@@ -25,7 +25,7 @@ body{
     text-align:center;
     margin: 20px;
 }
-.hidden{display:none;}
+.hidden{display:none !important;} /* Cập nhật thêm !important để đảm bảo ẩn/hiện mượt mà */
 h1{
     font-size:52px;
     color:white;
@@ -56,11 +56,26 @@ button{
 button:hover { background: #e08582; }
 .btn-teacher { background: #4A90E2; }
 .btn-teacher:hover { background: #357ABD; }
+
+/* BỔ SUNG: Header cho Quiz (Time trái, Score phải) */
+.quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
 #timer{
-    font-size:42px;
+    font-size:32px;
     color:#BA1B18;
     font-weight:bold;
+    margin: 0;
 }
+#scoreTracker {
+    font-size:32px;
+    color:#4A90E2;
+    font-weight:bold;
+}
+
 #progressContainer{
     width:100%;
     height:22px;
@@ -75,17 +90,14 @@ button:hover { background: #e08582; }
     background:#9ABF17;
     transition:.4s;
 }
-#questionCounter{font-size:24px;}
+#questionCounter{font-size:20px; color:#666; margin-bottom: 10px;}
 #questionBox{
     font-size:38px;
     font-weight:bold;
     margin:20px 0;
 }
 
-/* Thêm style cho khung chứa ảnh câu hỏi */
-.question-image-container {
-    margin: 15px 0;
-}
+.question-image-container { margin: 15px 0; }
 .question-image {
     max-width: 100%;
     max-height: 220px;
@@ -116,7 +128,25 @@ tr:nth-child(even){background-color: #f9f9f9;}
 .vocab-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 18px; align-items: center;}
 .vocab-thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; margin-right: 10px; vertical-align: middle; }
 
-/* Style cho hiệu ứng bóng bay */
+/* BỔ SUNG: Style cho các nút trắc nghiệm */
+.mc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin: 15px 0;
+}
+.mc-btn {
+    background: #f0f0f0;
+    color: #333;
+    border: 2px solid #ccc;
+    margin: 0;
+    font-size: 20px;
+    border-radius: 10px;
+    padding: 15px 10px;
+}
+.mc-btn:hover { background: #e4e4e4; }
+.mc-btn.selected { border-color: #4A90E2; background: #eef5fc; }
+
 .balloon {
     position: absolute;
     bottom: -120px;
@@ -146,17 +176,15 @@ tr:nth-child(even){background-color: #f9f9f9;}
     background: rgba(0,0,0,0.15);
     transform: translateX(-50%);
 }
-
 @keyframes floatUp {
-    0% {
-        transform: translateY(0) rotate(0deg);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-110vh) rotate(15deg);
-        opacity: 0;
-    }
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(-110vh) rotate(15deg); opacity: 0; }
 }
+
+/* Form giáo viên tạo MC */
+.mc-input-group { display: flex; align-items: center; margin-bottom: 5px; }
+.mc-input-group input[type="text"] { width: 85%; margin-bottom: 0; }
+.mc-input-group input[type="radio"] { width: 10%; margin-left: 5%; transform: scale(1.5); }
 </style>
 </head>
 <body>
@@ -180,25 +208,39 @@ tr:nth-child(even){background-color: #f9f9f9;}
 </div>
 
 <div id="quizScreen" class="screen hidden">
-    <div id="timer">Time Left: 30s</div>
+    <!-- BỔ SUNG: Header chứa Timer và Score Tracker -->
+    <div class="quiz-header">
+        <div id="timer">Time Left: 30s</div>
+        <div id="scoreTracker">0/0</div>
+    </div>
+    
     <div id="progressContainer"><div id="progressBar"></div></div>
     <div id="questionCounter"></div>
     
-    <!-- Vùng hiển thị câu hỏi và hình ảnh -->
     <div id="imageContainer" class="question-image-container hidden">
         <img id="questionImage" class="question-image" src="" alt="Vocabulary Image">
     </div>
     <div id="questionBox"></div>
     
     <div id="feedback"></div>
+    
+    <!-- LOẠI 1: Ô NHẬP TEXT CŨ -->
     <input type="text" id="answerInput" placeholder="Type your answer...">
+    
+    <!-- BỔ SUNG LOẠI 2: 4 NÚT TRẮC NGHIỆM -->
+    <div id="mcContainer" class="mc-grid hidden">
+        <button class="mc-btn" id="mcBtn0" onclick="selectMcOption(0)">Option A</button>
+        <button class="mc-btn" id="mcBtn1" onclick="selectMcOption(1)">Option B</button>
+        <button class="mc-btn" id="mcBtn2" onclick="selectMcOption(2)">Option C</button>
+        <button class="mc-btn" id="mcBtn3" onclick="selectMcOption(3)">Option D</button>
+    </div>
+    
     <br>
     <button id="actionBtn" onclick="handleActionButton()">OK</button>
 </div>
 
 <div id="resultScreen" class="screen hidden" style="position: relative; overflow: hidden;">
     <canvas id="fireworksCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1;"></canvas>
-    
     <div style="position:relative; z-index:2;">
         <h2 style="font-size:48px;">CONGRATULATIONS!</h2>
         <p style="font-size:30px;">YOU GET</p>
@@ -215,29 +257,62 @@ tr:nth-child(even){background-color: #f9f9f9;}
     
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
         <h2 style="margin: 10px 0;">1. Ngân Hàng Câu Hỏi (<span id="totalQuestCount">0</span> câu)</h2>
-        <button onclick="deleteAllQuestions()" style="background:#BA1B18; font-size:14px; padding:6px 15px; margin: 10px 0;">❌ Xóa tất cả từ vựng</button>
+        <button onclick="deleteAllQuestions()" style="background:#BA1B18; font-size:14px; padding:6px 15px; margin: 10px 0;">❌ Xóa tất cả</button>
     </div>
     <div class="vocab-list" id="vocabListContainer"></div>
     
     <div style="background:#eef5fc; padding:20px; border-radius:10px; text-align:left;">
-        <h3 style="margin-top:0;">Thêm từ vựng mới:</h3>
-        <input type="text" id="newViet" placeholder="Nghĩa tiếng Việt (Ví dụ: lính cứu hỏa)" style="width:95%;">
-        <input type="text" id="newEng" placeholder="Các đáp án tiếng Anh - cách nhau bằng dấu phẩy (Ví dụ: firefighter)" style="width:95%;">
-        <input type="text" id="newImg" placeholder="Link/URL hình ảnh (Tùy chọn - Ví dụ: https://example.com/firefighter.jpg)" style="width:95%;">
-        <button class="btn-teacher" onclick="addQuestion()" style="margin-top:10px;">Thêm Vào Hệ Thống</button>
+        <h3 style="margin-top:0;">Thêm từ vựng/câu hỏi mới:</h3>
+        
+        <!-- BỔ SUNG: Cho phép GV chọn dạng câu hỏi -->
+        <select id="questionTypeSelect" onchange="toggleTeacherForm()" style="width: 95%; background: white;">
+            <option value="text">Dạng 1: Học sinh tự gõ đáp án</option>
+            <option value="mc">Dạng 2: Trắc nghiệm 4 đáp án (Chỉ chọn 1)</option>
+        </select>
+
+        <input type="text" id="newViet" placeholder="Câu hỏi / Nghĩa tiếng Việt (Ví dụ: lính cứu hỏa)" style="width:95%;">
+        <input type="text" id="newImg" placeholder="Link/URL hình ảnh (Tùy chọn - Ví dụ: https://example.com/...)" style="width:95%;">
+        
+        <!-- Vùng nhập cho Dạng 1 -->
+        <div id="textFormGroup">
+            <input type="text" id="newEng" placeholder="Các đáp án tiếng Anh - cách nhau dấu phẩy (Ví dụ: firefighter)" style="width:95%;">
+        </div>
+
+        <!-- BỔ SUNG: Vùng nhập cho Dạng 2 -->
+        <div id="mcFormGroup" class="hidden" style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ccc; width: 91%;">
+            <p style="margin-top:0; font-size:18px;">Nhập 4 đáp án và tích chọn vào đáp án ĐÚNG:</p>
+            <div class="mc-input-group">
+                <input type="text" id="mcOpt0" placeholder="Đáp án A">
+                <input type="radio" name="mcCorrect" value="0" checked>
+            </div>
+            <div class="mc-input-group">
+                <input type="text" id="mcOpt1" placeholder="Đáp án B">
+                <input type="radio" name="mcCorrect" value="1">
+            </div>
+            <div class="mc-input-group">
+                <input type="text" id="mcOpt2" placeholder="Đáp án C">
+                <input type="radio" name="mcCorrect" value="2">
+            </div>
+            <div class="mc-input-group">
+                <input type="text" id="mcOpt3" placeholder="Đáp án D">
+                <input type="radio" name="mcCorrect" value="3">
+            </div>
+        </div>
+
+        <button class="btn-teacher" onclick="addQuestion()" style="margin-top:15px;">Thêm Vào Hệ Thống</button>
     </div>
 
     <hr style="margin:30px 0; border:0; border-top:1px solid #ccc;">
 
     <h2>2. Giám Sát Kết Quả Học Sinh Trực Tuyến</h2>
-    <button onclick="clearAnalytics()" style="background:#BA1B18; font-size:16px; padding:5px 15px;">Xóa toàn bộ lịch sử nộp bài</button>
+    <button onclick="clearAnalytics()" style="background:#BA1B18; font-size:16px; padding:5px 15px;">Xóa toàn bộ lịch sử</button>
     <div style="overflow-x:auto;">
         <table>
             <thead>
                 <tr>
                     <th style="width: 10%;">STT</th>
                     <th style="width: 30%;">Họ và Tên</th>
-                    <th style="width: 30%;">Kết quả lượt này (Đúng/Tổng)</th>
+                    <th style="width: 30%;">Kết quả lượt này</th>
                     <th style="width: 30%;">Thời gian nộp bài</th>
                 </tr>
             </thead>
@@ -248,7 +323,6 @@ tr:nth-child(even){background-color: #f9f9f9;}
     </div>
 </div>
 
-<!-- Thẻ âm thanh -->
 <audio id="correctSound" preload="auto"><source src="correct.mp3" type="audio/mpeg"></audio>
 <audio id="wrongSound" preload="auto"><source src="wrong.mp3" type="audio/mpeg"></audio>
 <audio id="winnerSound" preload="auto"><source src="winnersound.mp3" type="audio/mpeg"></audio>
@@ -256,43 +330,14 @@ tr:nth-child(even){background-color: #f9f9f9;}
 <script>
 const FIREBASE_URL = "https://grade-9-for-teachers-default-rtdb.firebaseio.com"; 
 
-// Thêm thuộc tính image vào từ vựng (ví dụ minh họa)
 const defaultQuestions = [
-    {vietnamese:"cơ sở vật chất", english:"facilities", image:""},
-    {vietnamese:"lính cứu hỏa", english:"firefighter", image:"https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=400"},
-    {vietnamese:"chuẩn bị", english:"prepare", image:""},
-    {vietnamese:"tầm quan trọng", english:"importance", image:""},
-    {vietnamese:"tiệc tân gia", english:"house-warming party", image:""},
-    {vietnamese:"đặc sản địa phương", english:"speciality food", image:""},
-    {vietnamese:"người tiêu thụ, khách hàng", english:"consumer", image:""},
-    {vietnamese:"làm thủ công", english:"hand-craft", image:""},
-    {vietnamese:"trung tâm thành phố", english:"city centre", image:""},
-    {vietnamese:"hướng dẫn", english:"instruct", image:""},
-    {vietnamese:"thợ thủ công", english:"artisan", image:""},
-    {vietnamese:"cải thiện", english:"improve", image:""},
-    {vietnamese:"điểm thu hút khách du lịch", english:"tourist attraction", image:""},
-    {vietnamese:"địa phương", english:"local", image:""},
-    {vietnamese:"nguyên bản", english:"original", image:""},
-    {vietnamese:"cảnh sát", english:"police officer", image:""},
-    {vietnamese:"rút ngắn", english:"shorten", image:""},
-    {vietnamese:"người giao hàng", english:"delivery person", image:""},
-    {vietnamese:"quạt giấy", english:"paper fan", image:""},
-    {vietnamese:"đồ gốm", english:"pottery", image:"https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400"},
-    {vietnamese:"chăm chỉ", english:"hard-working", image:""},
-    {vietnamese:"va li", english:"suitcase", image:""},
-    {vietnamese:"tài sản", english:"property", image:""},
-    {vietnamese:"thợ điện", english:"electrician", image:""},
-    {vietnamese:"hương thơm", english:"fragrance", image:""},
-    {vietnamese:"đồ thủ công", english:"handicraft", image:""},
-    {vietnamese:"dây điện", english:"electrical wires", image:""},
-    {vietnamese:"được sản xuất hàng loạt", english:"manufactured", image:""},
-    {vietnamese:"người thu gom rác", english:"garbage collector", image:""},
-    {vietnamese:"phân loại", english:"sort", image:""}
+    {vietnamese:"lính cứu hỏa", english:"firefighter", image:"https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=400", type:"text"}
 ];
 
 let questions = [...defaultQuestions];
 let currentQuestion=0, score=0, totalWrong=0, timeLeft=30, timer, isPlaying=false, studentName="";
 let isChecked = false;
+let selectedMcIndex = -1; // Biến lưu lựa chọn trắc nghiệm của học sinh
 
 function getAcceptedAnswers(englishString) {
     if(!englishString) return [];
@@ -306,15 +351,9 @@ async function loadQuestionsFromDatabase() {
             let data = await res.json();
             if (data && Object.keys(data).length > 0) {
                 questions = Object.keys(data).map(key => ({id: key, ...data[key]}));
-            } else {
-                questions = [...defaultQuestions];
-            }
-        } else {
-            questions = [...defaultQuestions];
-        }
-    } catch (e) { 
-        questions = [...defaultQuestions]; 
-    }
+            } else { questions = [...defaultQuestions]; }
+        } else { questions = [...defaultQuestions]; }
+    } catch (e) { questions = [...defaultQuestions]; }
     let countEl = document.getElementById("totalQuestCount");
     if(countEl) countEl.innerText = questions.length;
     renderVocabList();
@@ -324,13 +363,13 @@ async function goToStudentLogin() {
     showScreen('startScreen');
     document.getElementById("studentNotice").innerHTML = "Đang đồng bộ số lượng từ vựng trực tuyến...";
     await loadQuestionsFromDatabase();
-    document.getElementById("studentNotice").innerHTML = `Hệ thống đã sẵn sàng! Đang có bài kiểm tra gồm: <b style="color:#BA1B18; font-size:20px;">${questions.length} từ vựng</b>.`;
+    document.getElementById("studentNotice").innerHTML = `Hệ thống sẵn sàng! Đang có bài kiểm tra gồm: <b style="color:#BA1B18; font-size:20px;">${questions.length} câu</b>.`;
 }
 
 function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById(screenId).classList.remove('hidden');
-    if(screenId === 'teacherScreen') { loadAnalytics(); }
+    if(screenId === 'teacherScreen') { loadAnalytics(); toggleTeacherForm(); }
 }
 
 function checkTeacherPassword() {
@@ -350,10 +389,7 @@ function unlockAudio() {
     ['correctSound', 'wrongSound', 'winnerSound'].forEach(id => {
         let audio = document.getElementById(id);
         if (audio) {
-            audio.play().then(() => {
-                audio.pause();
-                audio.currentTime = 0;
-            }).catch(() => {});
+            audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {});
         }
     });
 }
@@ -364,10 +400,7 @@ function startGame(){
     if(questions.length === 0) { alert("Không có câu hỏi nào để bắt đầu!"); return; }
     
     unlockAudio();
-
-    currentQuestion = 0;
-    score = 0;
-    totalWrong = 0;
+    currentQuestion = 0; score = 0; totalWrong = 0;
     shuffleArray(questions);
     showScreen('quizScreen');
     isPlaying = true; 
@@ -383,30 +416,29 @@ function startTimer() {
         document.getElementById("timer").innerText = "Time Left: " + timeLeft + "s";
         if (timeLeft <= 0) { 
             clearInterval(timer); 
-            if(!isChecked) {
-                checkAnswer();
-            } else {
-                nextQuestion(); 
-            }
+            if(!isChecked) { checkAnswer(); } else { nextQuestion(); }
         }
     }, 1000);
 }
 
+// BỔ SUNG: Logic load dạng câu hỏi tương ứng
 function loadQuestion(){
     if (currentQuestion >= questions.length) { finishQuiz(); return; }
     isChecked = false;
-    document.getElementById("questionCounter").innerHTML="Question "+(currentQuestion+1)+" / "+questions.length;
+    selectedMcIndex = -1;
+    
+    // CẬP NHẬT: Số câu hoàn thành nằm ở góc phải (Score tracker)
+    document.getElementById("scoreTracker").innerHTML = score + "/" + questions.length;
+    document.getElementById("questionCounter").innerHTML="Đang làm câu "+(currentQuestion+1)+" / "+questions.length;
     
     let currentData = questions[currentQuestion];
     let imgContainer = document.getElementById("imageContainer");
     let imgEl = document.getElementById("questionImage");
     
-    // Kiểm tra xem câu hỏi có ảnh hay không
     if (currentData.image && currentData.image.trim() !== "") {
         imgEl.src = currentData.image;
         imgContainer.classList.remove("hidden");
-        // Nếu có ảnh, có thể gợi ý bằng tiếng Việt hoặc ẩn bớt
-        document.getElementById("questionBox").innerHTML = currentData.vietnamese ? `(${currentData.vietnamese})` : "Look at the picture and write the word:";
+        document.getElementById("questionBox").innerHTML = currentData.vietnamese ? `(${currentData.vietnamese})` : "Look at the picture:";
     } else {
         imgContainer.classList.add("hidden");
         imgEl.src = "";
@@ -415,52 +447,100 @@ function loadQuestion(){
     
     document.getElementById("progressBar").style.width=((currentQuestion/questions.length)*100)+"%";
     
-    let input=document.getElementById("answerInput");
-    input.value=""; 
-    input.readOnly = false;
-    input.classList.remove("correct","wrong");
+    let input = document.getElementById("answerInput");
+    let mcContainer = document.getElementById("mcContainer");
+    
+    // Xóa định dạng cũ
+    input.value=""; input.readOnly = false; input.classList.remove("correct","wrong");
+    document.querySelectorAll('.mc-btn').forEach(btn => {
+        btn.classList.remove("selected", "correct", "wrong");
+        btn.disabled = false;
+    });
+
+    // PHÂN LOẠI HIỂN THỊ DẠNG CÂU HỎI
+    if(currentData.type === 'mc') {
+        // Dạng trắc nghiệm
+        input.classList.add("hidden");
+        mcContainer.classList.remove("hidden");
+        // Hiển thị 4 đáp án
+        for(let i=0; i<4; i++) {
+            document.getElementById(`mcBtn${i}`).innerText = currentData.mcOptions[i] || "";
+        }
+    } else {
+        // Dạng gõ chữ cũ (mặc định nếu dữ liệu cũ không có type)
+        mcContainer.classList.add("hidden");
+        input.classList.remove("hidden");
+        input.focus(); 
+    }
     
     document.getElementById("feedback").innerHTML=""; 
     document.getElementById("actionBtn").innerText = "OK";
-    
-    input.focus(); 
     startTimer();
 }
 
+// BỔ SUNG: Logic cho nút chọn trắc nghiệm
+function selectMcOption(index) {
+    if(isChecked) return; // Nếu đã check kết quả rồi thì không cho bấm lại
+    selectedMcIndex = index;
+    // Bỏ chọn nút cũ, tô sáng nút mới
+    document.querySelectorAll('.mc-btn').forEach(btn => btn.classList.remove("selected"));
+    document.getElementById(`mcBtn${index}`).classList.add("selected");
+}
+
 function handleActionButton() {
-    if (!isChecked) {
-        checkAnswer();
-    } else {
-        nextQuestion();
-    }
+    if (!isChecked) { checkAnswer(); } else { nextQuestion(); }
 }
 
 function checkAnswer(){
     clearInterval(timer);
     isChecked = true;
     
-    const input = document.getElementById("answerInput");
-    input.readOnly = true;
-    const answer = input.value.trim().toLowerCase();
+    let currentData = questions[currentQuestion];
+    let isCorrect = false;
     const feedback = document.getElementById("feedback");
-    let validAnswers = getAcceptedAnswers(questions[currentQuestion].english);
 
-    if(validAnswers.includes(answer)){
+    if(currentData.type === 'mc') {
+        // Kiểm tra trắc nghiệm
+        document.querySelectorAll('.mc-btn').forEach(btn => btn.disabled = true);
+        if(selectedMcIndex === parseInt(currentData.mcCorrect)) {
+            isCorrect = true;
+            if(selectedMcIndex >= 0) document.getElementById(`mcBtn${selectedMcIndex}`).classList.add("correct");
+        } else {
+            if(selectedMcIndex >= 0) document.getElementById(`mcBtn${selectedMcIndex}`).classList.add("wrong");
+            // Hiển thị đáp án đúng
+            document.getElementById(`mcBtn${currentData.mcCorrect}`).classList.add("correct");
+        }
+    } else {
+        // Kiểm tra gõ chữ cũ
+        const input = document.getElementById("answerInput");
+        input.readOnly = true;
+        const answer = input.value.trim().toLowerCase();
+        let validAnswers = getAcceptedAnswers(currentData.english);
+        
+        if(validAnswers.includes(answer)){
+            isCorrect = true;
+            input.classList.add("correct"); 
+            input.classList.remove("wrong");
+        } else {
+            input.classList.add("wrong"); 
+            input.classList.remove("correct");
+        }
+    }
+
+    if(isCorrect){
         score++;
-        input.classList.add("correct"); 
-        input.classList.remove("wrong");
         feedback.innerHTML = "✔"; 
         feedback.className = "correctMark";
         playSound("correctSound");
     } else {
         totalWrong++;
-        input.classList.add("wrong"); 
-        input.classList.remove("correct");
         feedback.innerHTML = "✖"; 
         feedback.className = "wrongMark";
         playSound("wrongSound");
     }
     
+    // Cập nhật ngay lập tức điểm lên góc phải
+    document.getElementById("scoreTracker").innerHTML = score + "/" + questions.length;
     document.getElementById("actionBtn").innerText = "NEXT";
 }
 
@@ -470,9 +550,7 @@ function playSound(audioId) {
         if(snd) {
             snd.currentTime = 0;
             let promise = snd.play();
-            if (promise !== undefined) {
-                promise.catch(error => { console.log("Lỗi phát âm thanh:", error); });
-            }
+            if (promise !== undefined) { promise.catch(error => { console.log("Lỗi âm thanh:", error); }); }
         }
     } catch(e){}
 }
@@ -485,15 +563,8 @@ function nextQuestion(){
 }
 
 async function sendResultToDatabase() {
-    let record = { 
-        name: studentName, 
-        correct: score, 
-        total: questions.length, 
-        time: new Date().toLocaleString('vi-VN') 
-    };
-    try { 
-        await fetch(`${FIREBASE_URL}/analytics.json`, { method: 'POST', body: JSON.stringify(record) }); 
-    } catch (e) {}
+    let record = { name: studentName, correct: score, total: questions.length, time: new Date().toLocaleString('vi-VN') };
+    try { await fetch(`${FIREBASE_URL}/analytics.json`, { method: 'POST', body: JSON.stringify(record) }); } catch (e) {}
 }
 
 function finishQuiz(){
@@ -502,7 +573,6 @@ function finishQuiz(){
     sendResultToDatabase(); 
     showScreen('resultScreen');
     document.getElementById("finalScore").innerHTML=score+" / "+questions.length;
-    
     playSound("winnerSound");
     launchFireworks();
 }
@@ -513,6 +583,7 @@ document.addEventListener("visibilitychange", function() {
     }
 });
 
+// BỔ SUNG: Hiển thị list từ vựng có phân biệt dạng câu hỏi
 function renderVocabList() {
     let html = "";
     let container = document.getElementById("vocabListContainer");
@@ -522,13 +593,21 @@ function renderVocabList() {
     }
     questions.forEach((q, index) => {
         let qId = q.id ? q.id : index;
-        let displayEng = q.english.split(',').map(t => t.trim()).join(' / ');
         let imgTag = q.image ? `<img src="${q.image}" class="vocab-thumb" alt="thumb">` : '';
+        let displayType = "";
+        
+        if(q.type === 'mc') {
+            let correctText = q.mcOptions[q.mcCorrect];
+            displayType = `<span style="color:#BA1B18;">(Trắc nghiệm)</span> Đáp án: ${correctText}`;
+        } else {
+            let displayEng = q.english ? q.english.split(',').map(t => t.trim()).join(' / ') : '';
+            displayType = `<span style="color:#4A90E2;">(Điền từ)</span> ${displayEng}`;
+        }
         
         html += `<div class="vocab-item">
             <span style="display:flex; align-items:center;">
                 ${imgTag}
-                <span>${index+1}. <b>${q.vietnamese || "Hình ảnh"}</b>: <span style="color:#4A90E2;">${displayEng}</span></span>
+                <span>${index+1}. <b>${q.vietnamese || "Hình ảnh"}</b>: ${displayType}</span>
             </span>
             <button onclick="deleteQuestion('${qId}')" style="background:#BA1B18; padding:3px 10px; font-size:14px; margin:0;">Xóa</button>
         </div>`;
@@ -536,22 +615,69 @@ function renderVocabList() {
     container.innerHTML = html;
 }
 
+// BỔ SUNG: Chuyển đổi form nhập cho Giáo viên
+function toggleTeacherForm() {
+    let type = document.getElementById("questionTypeSelect").value;
+    if(type === 'mc') {
+        document.getElementById("textFormGroup").classList.add("hidden");
+        document.getElementById("mcFormGroup").classList.remove("hidden");
+    } else {
+        document.getElementById("textFormGroup").classList.remove("hidden");
+        document.getElementById("mcFormGroup").classList.add("hidden");
+    }
+}
+
+// BỔ SUNG: Đẩy câu hỏi theo format mới lên Firebase
 async function addQuestion() {
+    let qType = document.getElementById("questionTypeSelect").value;
     let v = document.getElementById("newViet").value.trim();
-    let e = document.getElementById("newEng").value.trim();
     let img = document.getElementById("newImg").value.trim();
-    
-    if(!e) { alert("Vui lòng điền ít nhất đáp án tiếng Anh!"); return; }
-    if(!v && !img) { alert("Vui lòng điền nghĩa tiếng Việt HOẶC link hình ảnh!"); return; }
+    let dataPayload = null;
+
+    if(qType === 'mc') {
+        let opt0 = document.getElementById("mcOpt0").value.trim();
+        let opt1 = document.getElementById("mcOpt1").value.trim();
+        let opt2 = document.getElementById("mcOpt2").value.trim();
+        let opt3 = document.getElementById("mcOpt3").value.trim();
+        let correctVal = document.querySelector('input[name="mcCorrect"]:checked').value;
+
+        if(!opt0 || !opt1 || !opt2 || !opt3) { alert("Vui lòng điền đủ 4 đáp án trắc nghiệm!"); return; }
+        if(!v && !img) { alert("Vui lòng điền nghĩa tiếng Việt HOẶC link hình ảnh!"); return; }
+        
+        dataPayload = {
+            type: 'mc',
+            vietnamese: v,
+            image: img,
+            mcOptions: [opt0, opt1, opt2, opt3],
+            mcCorrect: parseInt(correctVal)
+        };
+    } else {
+        let e = document.getElementById("newEng").value.trim();
+        if(!e) { alert("Vui lòng điền ít nhất đáp án tiếng Anh!"); return; }
+        if(!v && !img) { alert("Vui lòng điền nghĩa tiếng Việt HOẶC link hình ảnh!"); return; }
+        
+        dataPayload = {
+            type: 'text',
+            vietnamese: v,
+            english: e.toLowerCase(),
+            image: img
+        };
+    }
 
     try {
         await fetch(`${FIREBASE_URL}/questions.json`, { 
             method: 'POST', 
-            body: JSON.stringify({ vietnamese: v, english: e.toLowerCase(), image: img }) 
+            body: JSON.stringify(dataPayload) 
         });
+        
+        // Reset form
         document.getElementById("newViet").value = ""; 
-        document.getElementById("newEng").value = "";
         document.getElementById("newImg").value = "";
+        document.getElementById("newEng").value = "";
+        document.getElementById("mcOpt0").value = "";
+        document.getElementById("mcOpt1").value = "";
+        document.getElementById("mcOpt2").value = "";
+        document.getElementById("mcOpt3").value = "";
     } catch(err){}
     await loadQuestionsFromDatabase();
 }
@@ -575,11 +701,10 @@ async function deleteAllQuestions() {
 async function loadAnalytics() {
     let tbody = document.getElementById("analyticsTableBody");
     if(!tbody) return;
-    
     try {
         let res = await fetch(`${FIREBASE_URL}/analytics.json`);
         let data = await res.json();
-        if(!data) { tbody.innerHTML = "<tr><td colspan='4'>Chưa có dữ liệu học sinh làm bài.</td></tr>"; return; }
+        if(!data) { tbody.innerHTML = "<tr><td colspan='4'>Chưa có dữ liệu.</td></tr>"; return; }
         
         let attemptsList = [];
         Object.keys(data).forEach(key => {
@@ -587,19 +712,12 @@ async function loadAnalytics() {
             if (item && item.name) {
                 let correct = Number(item.correct) || 0;
                 let total = item.total ? Number(item.total) : (correct + (Number(item.wrong) || 0));
-                
-                attemptsList.push({
-                    name: item.name,
-                    correct: correct,
-                    total: total,
-                    time: item.time || "Không rõ"
-                });
+                attemptsList.push({ name: item.name, correct: correct, total: total, time: item.time || "Không rõ" });
             }
         });
         
         if (attemptsList.length === 0) {
-            tbody.innerHTML = "<tr><td colspan='4'>Chưa có dữ liệu học sinh làm bài.</td></tr>"; 
-            return; 
+            tbody.innerHTML = "<tr><td colspan='4'>Chưa có dữ liệu.</td></tr>"; return; 
         }
 
         let html = "";
@@ -614,9 +732,7 @@ async function loadAnalytics() {
             </tr>`;
         });
         tbody.innerHTML = html;
-    } catch(err) { 
-        tbody.innerHTML = "<tr><td colspan='4' style='color:red;'>Lỗi đồng bộ dữ liệu với Firebase.</td></tr>"; 
-    }
+    } catch(err) { tbody.innerHTML = "<tr><td colspan='4' style='color:red;'>Lỗi đồng bộ.</td></tr>"; }
 }
 
 async function clearAnalytics() {
@@ -627,63 +743,38 @@ async function clearAnalytics() {
 
 function launchFireworks() {
     createBalloons(15);
-
     const canvas = document.getElementById('fireworksCanvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    
     const container = document.getElementById('resultScreen');
     canvas.width = container.clientWidth;
     canvas.height = container.clientHeight;
-
     let particles = [];
     const colors = ['#FF1493', '#00BFFF', '#FFD700', '#32CD32', '#FF4500', '#9400D3'];
 
     class Particle {
         constructor(x, y, color) {
-            this.x = x;
-            this.y = y;
-            this.color = color;
+            this.x = x; this.y = y; this.color = color;
             this.radius = Math.random() * 3 + 2;
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 6 + 2;
             this.vx = Math.cos(angle) * speed;
             this.vy = Math.sin(angle) * speed;
-            this.alpha = 1;
-            this.decay = Math.random() * 0.015 + 0.008;
+            this.alpha = 1; this.decay = Math.random() * 0.015 + 0.008;
         }
-
         draw() {
-            ctx.save();
-            ctx.globalAlpha = this.alpha;
-            ctx.beginPath();
+            ctx.save(); ctx.globalAlpha = this.alpha; ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.fill();
-            ctx.restore();
+            ctx.fillStyle = this.color; ctx.fill(); ctx.restore();
         }
-
-        update() {
-            this.x += this.vx;
-            this.y += this.vy;
-            this.vy += 0.05;
-            this.alpha -= this.decay;
-        }
+        update() { this.x += this.vx; this.y += this.vy; this.vy += 0.05; this.alpha -= this.decay; }
     }
-
     function createExplosion(x, y) {
-        const count = 40;
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        for (let i = 0; i < count; i++) {
-            particles.push(new Particle(x, y, color));
-        }
+        for (let i = 0; i < 40; i++) particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
     }
-
     let fireworkCount = 0;
     const interval = setInterval(() => {
-        const rx = Math.random() * (canvas.width - 100) + 50;
-        const ry = Math.random() * (canvas.height / 2) + 50;
-        createExplosion(rx, ry);
+        createExplosion(Math.random() * (canvas.width - 100) + 50, Math.random() * (canvas.height / 2) + 50);
         fireworkCount++;
         if (fireworkCount > 8) clearInterval(interval);
     }, 400);
@@ -691,15 +782,10 @@ function launchFireworks() {
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (let i = particles.length - 1; i >= 0; i--) {
-            particles[i].update();
-            particles[i].draw();
-            if (particles[i].alpha <= 0) {
-                particles.splice(i, 1);
-            }
+            particles[i].update(); particles[i].draw();
+            if (particles[i].alpha <= 0) particles.splice(i, 1);
         }
-        if (particles.length > 0 || fireworkCount <= 8) {
-            requestAnimationFrame(animate);
-        }
+        if (particles.length > 0 || fireworkCount <= 8) requestAnimationFrame(animate);
     }
     animate();
 }
@@ -707,24 +793,16 @@ function launchFireworks() {
 function createBalloons(count) {
     const container = document.getElementById('resultScreen');
     const balloonColors = ['#FF5964', '#35A7FF', '#FFE74C', '#6BF178', '#9B51E0'];
-
     for (let i = 0; i < count; i++) {
         const balloon = document.createElement('div');
         balloon.className = 'balloon';
-        
-        const color = balloonColors[Math.floor(Math.random() * balloonColors.length)];
-        balloon.style.backgroundColor = color;
-        
+        balloon.style.backgroundColor = balloonColors[Math.floor(Math.random() * balloonColors.length)];
         const string = document.createElement('div');
-        string.className = 'balloon-string';
-        balloon.appendChild(string);
-
+        string.className = 'balloon-string'; balloon.appendChild(string);
         balloon.style.left = Math.random() * 85 + 5 + '%';
         balloon.style.animationDuration = (Math.random() * 3 + 4) + 's';
         balloon.style.animationDelay = (Math.random() * 2) + 's';
-
         container.appendChild(balloon);
-
         setTimeout(() => balloon.remove(), 7000);
     }
 }
@@ -735,6 +813,12 @@ loadQuestionsFromDatabase();
 
 document.addEventListener("keypress",function(e){
     if(e.key==="Enter" && !document.getElementById("quizScreen").classList.contains("hidden")){ 
+        // BỔ SUNG: Không cho phép Enter qua câu nếu là dạng trắc nghiệm mà chưa chọn đáp án
+        let currentData = questions[currentQuestion];
+        if (currentData && currentData.type === 'mc' && !isChecked && selectedMcIndex === -1) {
+            alert("Vui lòng chọn một đáp án trước khi nhấn OK!");
+            return;
+        }
         handleActionButton(); 
     }
 });
