@@ -426,7 +426,7 @@ function loadQuestion(){
     selectedMcIndex = -1;
     
     document.getElementById("scoreTracker").innerHTML = score + "/" + playList.length;
-    document.getElementById("questionCounter").innerHTML="Đang làm câu "+(currentQuestion+1)+" / "+playList.length;
+    document.getElementById("questionCounter").innerHTML="Question "+(currentQuestion+1)+" / "+playList.length;
     
     let currentData = playList[currentQuestion];
     let imgContainer = document.getElementById("imageContainer");
@@ -603,7 +603,10 @@ function renderVocabList() {
     }
     questions.forEach((q, index) => {
         let qId = q.id ? q.id : index;
-        let imgTag = q.image ? `<img src="${q.image}" class="vocab-thumb" alt="thumb">` : '';
+        
+        // Đã thêm onerror để bắt lỗi link hỏng trong danh sách Teacher
+        let imgTag = q.image ? `<img src="${q.image}" class="vocab-thumb" alt="thumb" onerror="this.onerror=null; this.src='https://via.placeholder.com/45x45/cccccc/666666?text=Lỗi';">` : '';
+        
         let displayType = "";
         
         if(q.type === 'mc') {
