@@ -71,7 +71,12 @@ button:hover { background: #e08582; }
 #gameArea {
     width: 100%;
     height: 160px;
-    background: #70c5ce;
+    background-color: #CFEBFC; /* Màu bầu trời xanh da trời */
+    /* Tạo mây pixel bằng SVG và lặp lại liên tục */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='50' viewBox='0 0 150 50'%3E%3Crect x='30' y='10' width='30' height='10' fill='white' opacity='0.9'/%3E%3Crect x='20' y='20' width='50' height='10' fill='white' opacity='0.9'/%3E%3Crect x='10' y='30' width='70' height='10' fill='white' opacity='0.9'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-position: 0 15px;
+    animation: moveClouds 4s linear infinite; /* Hiệu ứng mây trôi */
     border: 4px solid #543847;
     border-radius: 10px;
     position: relative;
@@ -79,28 +84,38 @@ button:hover { background: #e08582; }
     margin-bottom: 15px;
     box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
 }
+
+/* Hiệu ứng mây trôi mượt mà */
+@keyframes moveClouds {
+    from { background-position-x: 0; }
+    to { background-position-x: 150px; }
+}
+
 .bird {
     position: absolute;
     left: 20%;
     top: 60px;
-    width: 45px;
-    height: 32px;
-    /* Base64 Pink Pixel Bird */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 12'%3E%3Cpath d='M6 0h5v1h2v1h1v2h1v4h-1v1h-2v1h-6v-1h-2v-1h-1v-2h-1v-3h1v-1h2v-1h1v-1z' fill='%23ff99cc'/%3E%3Cpath d='M6 0v1h-1v1h-2v1h-1v3h-1v2h1v1h2v1h6v1h2v-1h2v-1h1v-4h-1v-2h-1v-1h-2v-1h-5zm0 1h5v1h2v1h1v2h1v4h-1v1h-2v1h-6v-1h-2v-1h-1v-2h-1v-3h1v-1h2v-1h1v-1z' fill='%23543847'/%3E%3Crect x='11' y='2' width='2' height='3' fill='%23fff'/%3E%3Crect x='12' y='3' width='1' height='2' fill='%23000'/%3E%3Cpath d='M3 5h3v1h1v2h-1v1h-3v-1h-1v-2h1v-1z' fill='%23ff66b2'/%3E%3Cpath d='M12 7h4v1h1v2h-1v1h-4v-1h-1v-2h1v-1z' fill='%23ff3300'/%3E%3Cpath d='M12 8h4v1h-4z' fill='%23fff'/%3E%3C/svg%3E");
+    width: 60px; /* Điều chỉnh lại kích thước cho vừa tỷ lệ ảnh */
+    height: 50px;
+    background-image: url('image_2c6d71.png'); /* Gọi file ảnh bạn đã cung cấp */
     background-size: contain;
+    background-position: center;
     background-repeat: no-repeat;
     z-index: 10;
     animation: flap 0.5s infinite alternate ease-in-out;
 }
+
 @keyframes flap {
     0% { transform: translateY(-4px); }
     100% { transform: translateY(4px); }
 }
+
 .blink-red { animation: hurtBlink 0.5s; }
 @keyframes hurtBlink {
     0%, 100% { filter: brightness(1); }
     50% { filter: brightness(0.4) sepia(1) hue-rotate(-50deg) saturate(5); }
 }
+
 .pipe {
     position: absolute;
     left: 100%;
