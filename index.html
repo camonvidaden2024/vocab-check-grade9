@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VOCAB TIME! - LIVE SYSTEM</title>
+<title>VOCAB TIME! - FLAPPY BIRD EDITION</title>
 <style>
 body{
     font-family:"Times New Roman",serif;
@@ -18,7 +18,7 @@ body{
 .screen{
     width:85%;
     max-width:750px;
-    background:rgba(255,255,255,0.9);
+    background:rgba(255,255,255,0.95);
     padding:35px;
     border-radius:20px;
     box-shadow:0 10px 25px rgba(0,0,0,.15);
@@ -63,62 +63,76 @@ button:hover { background: #e08582; }
     align-items: center;
     margin-bottom: 10px;
 }
-#timer{
-    font-size:32px;
-    color:#BA1B18;
-    font-weight:bold;
-    margin: 0;
+#timer{ font-size:26px; color:#BA1B18; font-weight:bold; margin: 0; }
+#scoreTracker { font-size:26px; color:#4A90E2; font-weight:bold; }
+#livesTracker { font-size:26px; letter-spacing: 3px; }
+
+/* FLAPPY BIRD GAME AREA CSS */
+#gameArea {
+    width: 100%;
+    height: 160px;
+    background: #70c5ce;
+    border: 4px solid #543847;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 15px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
 }
-#scoreTracker {
-    font-size:32px;
-    color:#4A90E2;
-    font-weight:bold;
+.bird {
+    position: absolute;
+    left: 20%;
+    top: 60px;
+    width: 45px;
+    height: 32px;
+    /* Base64 Pink Pixel Bird */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 12'%3E%3Cpath d='M6 0h5v1h2v1h1v2h1v4h-1v1h-2v1h-6v-1h-2v-1h-1v-2h-1v-3h1v-1h2v-1h1v-1z' fill='%23ff99cc'/%3E%3Cpath d='M6 0v1h-1v1h-2v1h-1v3h-1v2h1v1h2v1h6v1h2v-1h2v-1h1v-4h-1v-2h-1v-1h-2v-1h-5zm0 1h5v1h2v1h1v2h1v4h-1v1h-2v1h-6v-1h-2v-1h-1v-2h-1v-3h1v-1h2v-1h1v-1z' fill='%23543847'/%3E%3Crect x='11' y='2' width='2' height='3' fill='%23fff'/%3E%3Crect x='12' y='3' width='1' height='2' fill='%23000'/%3E%3Cpath d='M3 5h3v1h1v2h-1v1h-3v-1h-1v-2h1v-1z' fill='%23ff66b2'/%3E%3Cpath d='M12 7h4v1h1v2h-1v1h-4v-1h-1v-2h1v-1z' fill='%23ff3300'/%3E%3Cpath d='M12 8h4v1h-4z' fill='%23fff'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 10;
+    animation: flap 0.5s infinite alternate ease-in-out;
+}
+@keyframes flap {
+    0% { transform: translateY(-4px); }
+    100% { transform: translateY(4px); }
+}
+.blink-red { animation: hurtBlink 0.5s; }
+@keyframes hurtBlink {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(0.4) sepia(1) hue-rotate(-50deg) saturate(5); }
+}
+.pipe {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    width: 60px;
+    height: 100%;
+}
+.pipe-top {
+    position: absolute;
+    top: -4px; left: 0; width: 100%; height: 50px;
+    background: #73bf2e; border: 4px solid #543847; border-bottom-width: 8px;
+}
+.pipe-bottom {
+    position: absolute;
+    bottom: -4px; left: 0; width: 100%; height: 50px;
+    background: #73bf2e; border: 4px solid #543847; border-top-width: 8px;
 }
 
-#progressContainer{
-    width:100%;
-    height:22px;
-    background:#ddd;
-    border-radius:20px;
-    overflow:hidden;
-    margin:15px 0;
-}
-#progressBar{
-    width:0%;
-    height:100%;
-    background:#9ABF17;
-    transition:.4s;
-}
+#progressContainer{ width:100%; height:22px; background:#ddd; border-radius:20px; overflow:hidden; margin:15px 0; }
+#progressBar{ width:0%; height:100%; background:#9ABF17; transition:.4s; }
 #questionCounter{font-size:20px; color:#666; margin-bottom: 10px;}
-#questionBox{
-    font-size:38px;
-    font-weight:bold;
-    margin:20px 0;
-}
-
+#questionBox{ font-size:38px; font-weight:bold; margin:20px 0; }
 .question-image-container { margin: 15px 0; }
-.question-image {
-    max-width: 100%;
-    max-height: 220px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    object-fit: contain;
-}
+.question-image { max-width: 100%; max-height: 220px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); object-fit: contain; }
 
 .correct{background:#9ABF17 !important;color:white;}
 .wrong{background:#BA1B18 !important;color:white;}
-#feedback{
-    font-size:80px;
-    height:90px;
-    font-weight:bold;
-}
+#feedback{ font-size:80px; height:90px; font-weight:bold; }
 .correctMark{color:#9ABF17;}
 .wrongMark{color:#BA1B18;}
-#finalScore{
-    font-size:48px;
-    color:#9ABF17;
-    font-weight:bold;
-}
+#finalScore{ font-size:48px; color:#9ABF17; font-weight:bold; }
+
 table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
 th, td { border: 1px solid #ddd; padding: 12px; text-align: left; font-size: 18px; }
 th { background-color: #4A90E2; color: white; }
@@ -127,57 +141,15 @@ tr:nth-child(even){background-color: #f9f9f9;}
 .vocab-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 18px; align-items: center;}
 .vocab-thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; margin-right: 10px; vertical-align: middle; }
 
-.mc-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin: 15px 0;
-}
-.mc-btn {
-    background: #f0f0f0;
-    color: #333;
-    border: 2px solid #ccc;
-    margin: 0;
-    font-size: 20px;
-    border-radius: 10px;
-    padding: 15px 10px;
-}
+.mc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
+.mc-btn { background: #f0f0f0; color: #333; border: 2px solid #ccc; margin: 0; font-size: 20px; border-radius: 10px; padding: 15px 10px; }
 .mc-btn:hover { background: #e4e4e4; }
 .mc-btn.selected { border-color: #4A90E2; background: #eef5fc; }
 
-.balloon {
-    position: absolute;
-    bottom: -120px;
-    width: 50px;
-    height: 65px;
-    border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
-    z-index: 1;
-    pointer-events: none;
-    animation: floatUp linear infinite;
-}
-.balloon::after {
-    content: "";
-    position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom: 8px solid inherit;
-}
-.balloon-string {
-    position: absolute;
-    bottom: -40px;
-    left: 50%;
-    width: 2px;
-    height: 40px;
-    background: rgba(0,0,0,0.15);
-    transform: translateX(-50%);
-}
-@keyframes floatUp {
-    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(-110vh) rotate(15deg); opacity: 0; }
-}
+.balloon { position: absolute; bottom: -120px; width: 50px; height: 65px; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; z-index: 1; pointer-events: none; animation: floatUp linear infinite; }
+.balloon::after { content: ""; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 8px solid inherit; }
+.balloon-string { position: absolute; bottom: -40px; left: 50%; width: 2px; height: 40px; background: rgba(0,0,0,0.15); transform: translateX(-50%); }
+@keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(-110vh) rotate(15deg); opacity: 0; } }
 
 .mc-input-group { display: flex; align-items: center; margin-bottom: 5px; }
 .mc-input-group input[type="text"] { width: 85%; margin-bottom: 0; }
@@ -206,10 +178,21 @@ tr:nth-child(even){background-color: #f9f9f9;}
 
 <div id="quizScreen" class="screen hidden">
     <div class="quiz-header">
-        <div id="timer">Time Left: 30s</div>
+        <div id="livesTracker">❤️❤️❤️❤️❤️</div>
         <div id="scoreTracker">0/0</div>
+        <div id="timer">Time Left: 30s</div>
     </div>
     
+    <!-- FLAPPY BIRD GAME AREA -->
+    <div id="gameArea">
+        <div id="flappyBird" class="bird"></div>
+        <div id="pipe" class="pipe">
+            <div class="pipe-top"></div>
+            <!-- Gap for bird to fly through -->
+            <div class="pipe-bottom"></div>
+        </div>
+    </div>
+
     <div id="progressContainer"><div id="progressBar"></div></div>
     <div id="questionCounter"></div>
     
@@ -257,12 +240,10 @@ tr:nth-child(even){background-color: #f9f9f9;}
     
     <div style="background:#eef5fc; padding:20px; border-radius:10px; text-align:left;">
         <h3 style="margin-top:0;">Thêm từ vựng/câu hỏi mới:</h3>
-        
         <select id="questionTypeSelect" onchange="toggleTeacherForm()" style="width: 95%; background: white;">
             <option value="text">Dạng 1: Học sinh tự gõ đáp án</option>
             <option value="mc">Dạng 2: Trắc nghiệm 4 đáp án (Chỉ chọn 1)</option>
         </select>
-
         <input type="text" id="newViet" placeholder="Câu hỏi / Nghĩa tiếng Việt (Ví dụ: lính cứu hỏa)" style="width:95%;">
         <input type="text" id="newImg" placeholder="Link/URL hình ảnh (Tùy chọn - Ví dụ: https://example.com/...)" style="width:95%;">
         
@@ -289,12 +270,10 @@ tr:nth-child(even){background-color: #f9f9f9;}
                 <input type="radio" name="mcCorrect" value="3">
             </div>
         </div>
-
         <button class="btn-teacher" onclick="addQuestion()" style="margin-top:15px;">Thêm Vào Hệ Thống</button>
     </div>
 
     <hr style="margin:30px 0; border:0; border-top:1px solid #ccc;">
-
     <h2>2. Giám Sát Kết Quả Học Sinh Trực Tuyến</h2>
     <button onclick="clearAnalytics()" style="background:#BA1B18; font-size:16px; padding:5px 15px;">Xóa toàn bộ lịch sử</button>
     <div style="overflow-x:auto;">
@@ -326,10 +305,11 @@ const defaultQuestions = [
 ];
 
 let questions = [...defaultQuestions];
-let playList = []; // Mảng clone riêng dành cho tiến trình làm bài để xáo trộn an toàn
+let playList = []; 
 let currentQuestion=0, score=0, totalWrong=0, timeLeft=30, timer, isPlaying=false, studentName="";
 let isChecked = false;
 let selectedMcIndex = -1;
+let lives = 5; // BIẾN MỚI: 5 mạng mặc định cho chim
 
 function getAcceptedAnswers(englishString) {
     if(!englishString) return [];
@@ -369,7 +349,6 @@ function checkTeacherPassword() {
     if(pass === "442266") { showScreen('teacherScreen'); } else { alert("Sai mật khẩu!"); }
 }
 
-// FIX 1: Viết lại hàm xáo trộn tương thích mọi trình duyệt (cách cổ điển, tránh lỗi JS báo chìm)
 function shuffleArray(array){
     for(let i = array.length - 1; i > 0; i--){
         let j = Math.floor(Math.random() * (i + 1));
@@ -383,10 +362,17 @@ function shuffleArray(array){
 function unlockAudio() {
     ['correctSound', 'wrongSound', 'winnerSound'].forEach(id => {
         let audio = document.getElementById(id);
-        if (audio) {
-            audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {});
-        }
+        if (audio) { audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {}); }
     });
+}
+
+function updateLivesUI() {
+    let html = "";
+    for(let i=0; i<5; i++) {
+        if(i < lives) html += "❤️️";
+        else html += "🖤"; // Tim đen khi mất mạng
+    }
+    document.getElementById("livesTracker").innerHTML = html;
 }
 
 function startGame(){
@@ -396,8 +382,9 @@ function startGame(){
     
     unlockAudio();
     currentQuestion = 0; score = 0; totalWrong = 0;
+    lives = 5; // Đặt lại 5 mạng
+    updateLivesUI();
     
-    // Tách riêng mảng làm bài để khi trộn không ảnh hưởng data gốc
     playList = [...questions];
     shuffleArray(playList);
     
@@ -425,6 +412,15 @@ function loadQuestion(){
     isChecked = false;
     selectedMcIndex = -1;
     
+    // Animation ống nước (Pipe) tiến tới chắn chim
+    let pipe = document.getElementById("pipe");
+    pipe.style.transition = "none";
+    pipe.style.left = "100%"; // Reset về lề phải
+    setTimeout(() => {
+        pipe.style.transition = "left 0.8s ease-out";
+        pipe.style.left = "35%"; // Chạy tới chắn ngay mặt chim
+    }, 50);
+
     document.getElementById("scoreTracker").innerHTML = score + "/" + playList.length;
     document.getElementById("questionCounter").innerHTML="Question "+(currentQuestion+1)+" / "+playList.length;
     
@@ -432,12 +428,9 @@ function loadQuestion(){
     let imgContainer = document.getElementById("imageContainer");
     let imgEl = document.getElementById("questionImage");
     
-    // FIX 2: Khắc phục lỗi hiển thị ảnh, thêm bộ xử lý nếu link hỏng
     if (currentData.image && currentData.image.trim() !== "") {
         imgEl.src = currentData.image.trim();
-        imgEl.onerror = function() {
-            this.src = "https://via.placeholder.com/400x220?text=Image+Not+Found";
-        };
+        imgEl.onerror = function() { this.src = "https://via.placeholder.com/400x220?text=Image+Not+Found"; };
         imgContainer.classList.remove("hidden");
         document.getElementById("questionBox").innerHTML = currentData.vietnamese ? `(${currentData.vietnamese})` : "Look at the picture:";
     } else {
@@ -462,7 +455,6 @@ function loadQuestion(){
         input.classList.add("hidden");
         mcContainer.classList.remove("hidden");
         
-        // FIX 3: Xáo trộn 4 đáp án trắc nghiệm A B C D để học sinh không đoán được vị trí
         let opts = [
             { text: currentData.mcOptions[0], isCorrect: (parseInt(currentData.mcCorrect) === 0) },
             { text: currentData.mcOptions[1], isCorrect: (parseInt(currentData.mcCorrect) === 1) },
@@ -510,17 +502,13 @@ function checkAnswer(){
         document.querySelectorAll('.mc-btn').forEach(btn => btn.disabled = true);
         let selectedBtn = (selectedMcIndex >= 0) ? document.getElementById(`mcBtn${selectedMcIndex}`) : null;
 
-        // Logic check đáp án theo cấu trúc đã xáo trộn
         if(selectedBtn && selectedBtn.dataset.correct === "true") {
             isCorrect = true;
             selectedBtn.classList.add("correct");
         } else {
             if(selectedBtn) selectedBtn.classList.add("wrong");
-            // Hiển thị đáp án đúng
             document.querySelectorAll('.mc-btn').forEach(btn => {
-                if(btn.dataset.correct === "true") {
-                    btn.classList.add("correct");
-                }
+                if(btn.dataset.correct === "true") btn.classList.add("correct");
             });
         }
     } else {
@@ -531,11 +519,9 @@ function checkAnswer(){
         
         if(validAnswers.includes(answer)){
             isCorrect = true;
-            input.classList.add("correct"); 
-            input.classList.remove("wrong");
+            input.classList.add("correct"); input.classList.remove("wrong");
         } else {
-            input.classList.add("wrong"); 
-            input.classList.remove("correct");
+            input.classList.add("wrong"); input.classList.remove("correct");
         }
     }
 
@@ -546,6 +532,14 @@ function checkAnswer(){
         playSound("correctSound");
     } else {
         totalWrong++;
+        lives--; // Mất mạng
+        updateLivesUI();
+        
+        // Hiệu ứng chim bị đau (chớp đỏ)
+        let bird = document.getElementById("flappyBird");
+        bird.classList.add("blink-red");
+        setTimeout(() => bird.classList.remove("blink-red"), 500);
+
         feedback.innerHTML = "✖"; 
         feedback.className = "wrongMark";
         playSound("wrongSound");
@@ -568,9 +562,21 @@ function playSound(audioId) {
 
 function nextQuestion(){
     if (!isPlaying) return;
-    currentQuestion++;
-    if(currentQuestion >= playList.length){ finishQuiz(); return; }
-    loadQuestion();
+
+    // Animation vượt ống nước: cột sẽ trôi về sau (xuyên qua)
+    let pipe = document.getElementById("pipe");
+    pipe.style.transition = "left 0.6s ease-in";
+    pipe.style.left = "-20%"; 
+
+    // Đợi hiệu ứng xong rồi mới chuyển trang
+    setTimeout(() => {
+        // Kiểm tra endgame (nếu mất hết tim)
+        if (lives <= 0) { finishQuiz(); return; }
+        
+        currentQuestion++;
+        if(currentQuestion >= playList.length){ finishQuiz(); return; }
+        loadQuestion();
+    }, 600);
 }
 
 async function sendResultToDatabase() {
@@ -603,10 +609,7 @@ function renderVocabList() {
     }
     questions.forEach((q, index) => {
         let qId = q.id ? q.id : index;
-        
-        // Đã thêm onerror để bắt lỗi link hỏng trong danh sách Teacher
         let imgTag = q.image ? `<img src="${q.image}" class="vocab-thumb" alt="thumb" onerror="this.onerror=null; this.src='https://via.placeholder.com/45x45/cccccc/666666?text=Lỗi';">` : '';
-        
         let displayType = "";
         
         if(q.type === 'mc') {
@@ -655,32 +658,17 @@ async function addQuestion() {
         if(!opt0 || !opt1 || !opt2 || !opt3) { alert("Vui lòng điền đủ 4 đáp án trắc nghiệm!"); return; }
         if(!v && !img) { alert("Vui lòng điền nghĩa tiếng Việt HOẶC link hình ảnh!"); return; }
         
-        dataPayload = {
-            type: 'mc',
-            vietnamese: v,
-            image: img,
-            mcOptions: [opt0, opt1, opt2, opt3],
-            mcCorrect: parseInt(correctVal)
-        };
+        dataPayload = { type: 'mc', vietnamese: v, image: img, mcOptions: [opt0, opt1, opt2, opt3], mcCorrect: parseInt(correctVal) };
     } else {
         let e = document.getElementById("newEng").value.trim();
         if(!e) { alert("Vui lòng điền ít nhất đáp án tiếng Anh!"); return; }
         if(!v && !img) { alert("Vui lòng điền nghĩa tiếng Việt HOẶC link hình ảnh!"); return; }
         
-        dataPayload = {
-            type: 'text',
-            vietnamese: v,
-            english: e.toLowerCase(),
-            image: img
-        };
+        dataPayload = { type: 'text', vietnamese: v, english: e.toLowerCase(), image: img };
     }
 
     try {
-        await fetch(`${FIREBASE_URL}/questions.json`, { 
-            method: 'POST', 
-            body: JSON.stringify(dataPayload) 
-        });
-        
+        await fetch(`${FIREBASE_URL}/questions.json`, { method: 'POST', body: JSON.stringify(dataPayload) });
         document.getElementById("newViet").value = ""; 
         document.getElementById("newImg").value = "";
         document.getElementById("newEng").value = "";
@@ -726,9 +714,7 @@ async function loadAnalytics() {
             }
         });
         
-        if (attemptsList.length === 0) {
-            tbody.innerHTML = "<tr><td colspan='4'>Chưa có dữ liệu.</td></tr>"; return; 
-        }
+        if (attemptsList.length === 0) { tbody.innerHTML = "<tr><td colspan='4'>Chưa có dữ liệu.</td></tr>"; return; }
 
         let html = "";
         attemptsList.forEach((item, index) => {
