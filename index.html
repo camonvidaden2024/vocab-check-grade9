@@ -25,7 +25,7 @@ body{
     text-align:center;
     margin: 20px;
 }
-.hidden{display:none !important;} /* Cập nhật thêm !important để đảm bảo ẩn/hiện mượt mà */
+.hidden{display:none !important;} 
 h1{
     font-size:52px;
     color:white;
@@ -57,7 +57,6 @@ button:hover { background: #e08582; }
 .btn-teacher { background: #4A90E2; }
 .btn-teacher:hover { background: #357ABD; }
 
-/* BỔ SUNG: Header cho Quiz (Time trái, Score phải) */
 .quiz-header {
     display: flex;
     justify-content: space-between;
@@ -128,7 +127,6 @@ tr:nth-child(even){background-color: #f9f9f9;}
 .vocab-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 18px; align-items: center;}
 .vocab-thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; margin-right: 10px; vertical-align: middle; }
 
-/* BỔ SUNG: Style cho các nút trắc nghiệm */
 .mc-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -181,7 +179,6 @@ tr:nth-child(even){background-color: #f9f9f9;}
     100% { transform: translateY(-110vh) rotate(15deg); opacity: 0; }
 }
 
-/* Form giáo viên tạo MC */
 .mc-input-group { display: flex; align-items: center; margin-bottom: 5px; }
 .mc-input-group input[type="text"] { width: 85%; margin-bottom: 0; }
 .mc-input-group input[type="radio"] { width: 10%; margin-left: 5%; transform: scale(1.5); }
@@ -208,7 +205,6 @@ tr:nth-child(even){background-color: #f9f9f9;}
 </div>
 
 <div id="quizScreen" class="screen hidden">
-    <!-- BỔ SUNG: Header chứa Timer và Score Tracker -->
     <div class="quiz-header">
         <div id="timer">Time Left: 30s</div>
         <div id="scoreTracker">0/0</div>
@@ -224,10 +220,8 @@ tr:nth-child(even){background-color: #f9f9f9;}
     
     <div id="feedback"></div>
     
-    <!-- LOẠI 1: Ô NHẬP TEXT CŨ -->
     <input type="text" id="answerInput" placeholder="Type your answer...">
     
-    <!-- BỔ SUNG LOẠI 2: 4 NÚT TRẮC NGHIỆM -->
     <div id="mcContainer" class="mc-grid hidden">
         <button class="mc-btn" id="mcBtn0" onclick="selectMcOption(0)">Option A</button>
         <button class="mc-btn" id="mcBtn1" onclick="selectMcOption(1)">Option B</button>
@@ -264,7 +258,6 @@ tr:nth-child(even){background-color: #f9f9f9;}
     <div style="background:#eef5fc; padding:20px; border-radius:10px; text-align:left;">
         <h3 style="margin-top:0;">Thêm từ vựng/câu hỏi mới:</h3>
         
-        <!-- BỔ SUNG: Cho phép GV chọn dạng câu hỏi -->
         <select id="questionTypeSelect" onchange="toggleTeacherForm()" style="width: 95%; background: white;">
             <option value="text">Dạng 1: Học sinh tự gõ đáp án</option>
             <option value="mc">Dạng 2: Trắc nghiệm 4 đáp án (Chỉ chọn 1)</option>
@@ -273,12 +266,10 @@ tr:nth-child(even){background-color: #f9f9f9;}
         <input type="text" id="newViet" placeholder="Câu hỏi / Nghĩa tiếng Việt (Ví dụ: lính cứu hỏa)" style="width:95%;">
         <input type="text" id="newImg" placeholder="Link/URL hình ảnh (Tùy chọn - Ví dụ: https://example.com/...)" style="width:95%;">
         
-        <!-- Vùng nhập cho Dạng 1 -->
         <div id="textFormGroup">
             <input type="text" id="newEng" placeholder="Các đáp án tiếng Anh - cách nhau dấu phẩy (Ví dụ: firefighter)" style="width:95%;">
         </div>
 
-        <!-- BỔ SUNG: Vùng nhập cho Dạng 2 -->
         <div id="mcFormGroup" class="hidden" style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ccc; width: 91%;">
             <p style="margin-top:0; font-size:18px;">Nhập 4 đáp án và tích chọn vào đáp án ĐÚNG:</p>
             <div class="mc-input-group">
@@ -335,9 +326,10 @@ const defaultQuestions = [
 ];
 
 let questions = [...defaultQuestions];
+let playList = []; // Mảng clone riêng dành cho tiến trình làm bài để xáo trộn an toàn
 let currentQuestion=0, score=0, totalWrong=0, timeLeft=30, timer, isPlaying=false, studentName="";
 let isChecked = false;
-let selectedMcIndex = -1; // Biến lưu lựa chọn trắc nghiệm của học sinh
+let selectedMcIndex = -1;
 
 function getAcceptedAnswers(englishString) {
     if(!englishString) return [];
@@ -377,10 +369,13 @@ function checkTeacherPassword() {
     if(pass === "442266") { showScreen('teacherScreen'); } else { alert("Sai mật khẩu!"); }
 }
 
+// FIX 1: Viết lại hàm xáo trộn tương thích mọi trình duyệt (cách cổ điển, tránh lỗi JS báo chìm)
 function shuffleArray(array){
-    for(let i=array.length-1;i>0;i--){
-        let j=Math.floor(Math.random()*(i+1));
-        [array[i],array[j]]=[array[j],array[i]];
+    for(let i = array.length - 1; i > 0; i--){
+        let j = Math.floor(Math.random() * (i + 1));
+        let temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
     }
     return array;
 }
@@ -401,7 +396,11 @@ function startGame(){
     
     unlockAudio();
     currentQuestion = 0; score = 0; totalWrong = 0;
-    shuffleArray(questions);
+    
+    // Tách riêng mảng làm bài để khi trộn không ảnh hưởng data gốc
+    playList = [...questions];
+    shuffleArray(playList);
+    
     showScreen('quizScreen');
     isPlaying = true; 
     loadQuestion();
@@ -421,53 +420,63 @@ function startTimer() {
     }, 1000);
 }
 
-// BỔ SUNG: Logic load dạng câu hỏi tương ứng
 function loadQuestion(){
-    if (currentQuestion >= questions.length) { finishQuiz(); return; }
+    if (currentQuestion >= playList.length) { finishQuiz(); return; }
     isChecked = false;
     selectedMcIndex = -1;
     
-    // CẬP NHẬT: Số câu hoàn thành nằm ở góc phải (Score tracker)
-    document.getElementById("scoreTracker").innerHTML = score + "/" + questions.length;
-    document.getElementById("questionCounter").innerHTML="Đang làm câu "+(currentQuestion+1)+" / "+questions.length;
+    document.getElementById("scoreTracker").innerHTML = score + "/" + playList.length;
+    document.getElementById("questionCounter").innerHTML="Đang làm câu "+(currentQuestion+1)+" / "+playList.length;
     
-    let currentData = questions[currentQuestion];
+    let currentData = playList[currentQuestion];
     let imgContainer = document.getElementById("imageContainer");
     let imgEl = document.getElementById("questionImage");
     
+    // FIX 2: Khắc phục lỗi hiển thị ảnh, thêm bộ xử lý nếu link hỏng
     if (currentData.image && currentData.image.trim() !== "") {
-        imgEl.src = currentData.image;
+        imgEl.src = currentData.image.trim();
+        imgEl.onerror = function() {
+            this.src = "https://via.placeholder.com/400x220?text=Image+Not+Found";
+        };
         imgContainer.classList.remove("hidden");
         document.getElementById("questionBox").innerHTML = currentData.vietnamese ? `(${currentData.vietnamese})` : "Look at the picture:";
     } else {
         imgContainer.classList.add("hidden");
         imgEl.src = "";
-        document.getElementById("questionBox").innerHTML = currentData.vietnamese;
+        document.getElementById("questionBox").innerHTML = currentData.vietnamese || "";
     }
     
-    document.getElementById("progressBar").style.width=((currentQuestion/questions.length)*100)+"%";
+    document.getElementById("progressBar").style.width=((currentQuestion/playList.length)*100)+"%";
     
     let input = document.getElementById("answerInput");
     let mcContainer = document.getElementById("mcContainer");
     
-    // Xóa định dạng cũ
     input.value=""; input.readOnly = false; input.classList.remove("correct","wrong");
     document.querySelectorAll('.mc-btn').forEach(btn => {
         btn.classList.remove("selected", "correct", "wrong");
         btn.disabled = false;
+        btn.dataset.correct = "false"; 
     });
 
-    // PHÂN LOẠI HIỂN THỊ DẠNG CÂU HỎI
     if(currentData.type === 'mc') {
-        // Dạng trắc nghiệm
         input.classList.add("hidden");
         mcContainer.classList.remove("hidden");
-        // Hiển thị 4 đáp án
+        
+        // FIX 3: Xáo trộn 4 đáp án trắc nghiệm A B C D để học sinh không đoán được vị trí
+        let opts = [
+            { text: currentData.mcOptions[0], isCorrect: (parseInt(currentData.mcCorrect) === 0) },
+            { text: currentData.mcOptions[1], isCorrect: (parseInt(currentData.mcCorrect) === 1) },
+            { text: currentData.mcOptions[2], isCorrect: (parseInt(currentData.mcCorrect) === 2) },
+            { text: currentData.mcOptions[3], isCorrect: (parseInt(currentData.mcCorrect) === 3) }
+        ];
+        shuffleArray(opts);
+        
         for(let i=0; i<4; i++) {
-            document.getElementById(`mcBtn${i}`).innerText = currentData.mcOptions[i] || "";
+            let btn = document.getElementById(`mcBtn${i}`);
+            btn.innerText = opts[i].text || "";
+            btn.dataset.correct = opts[i].isCorrect ? "true" : "false";
         }
     } else {
-        // Dạng gõ chữ cũ (mặc định nếu dữ liệu cũ không có type)
         mcContainer.classList.add("hidden");
         input.classList.remove("hidden");
         input.focus(); 
@@ -478,11 +487,9 @@ function loadQuestion(){
     startTimer();
 }
 
-// BỔ SUNG: Logic cho nút chọn trắc nghiệm
 function selectMcOption(index) {
-    if(isChecked) return; // Nếu đã check kết quả rồi thì không cho bấm lại
+    if(isChecked) return; 
     selectedMcIndex = index;
-    // Bỏ chọn nút cũ, tô sáng nút mới
     document.querySelectorAll('.mc-btn').forEach(btn => btn.classList.remove("selected"));
     document.getElementById(`mcBtn${index}`).classList.add("selected");
 }
@@ -495,23 +502,28 @@ function checkAnswer(){
     clearInterval(timer);
     isChecked = true;
     
-    let currentData = questions[currentQuestion];
+    let currentData = playList[currentQuestion];
     let isCorrect = false;
     const feedback = document.getElementById("feedback");
 
     if(currentData.type === 'mc') {
-        // Kiểm tra trắc nghiệm
         document.querySelectorAll('.mc-btn').forEach(btn => btn.disabled = true);
-        if(selectedMcIndex === parseInt(currentData.mcCorrect)) {
+        let selectedBtn = (selectedMcIndex >= 0) ? document.getElementById(`mcBtn${selectedMcIndex}`) : null;
+
+        // Logic check đáp án theo cấu trúc đã xáo trộn
+        if(selectedBtn && selectedBtn.dataset.correct === "true") {
             isCorrect = true;
-            if(selectedMcIndex >= 0) document.getElementById(`mcBtn${selectedMcIndex}`).classList.add("correct");
+            selectedBtn.classList.add("correct");
         } else {
-            if(selectedMcIndex >= 0) document.getElementById(`mcBtn${selectedMcIndex}`).classList.add("wrong");
+            if(selectedBtn) selectedBtn.classList.add("wrong");
             // Hiển thị đáp án đúng
-            document.getElementById(`mcBtn${currentData.mcCorrect}`).classList.add("correct");
+            document.querySelectorAll('.mc-btn').forEach(btn => {
+                if(btn.dataset.correct === "true") {
+                    btn.classList.add("correct");
+                }
+            });
         }
     } else {
-        // Kiểm tra gõ chữ cũ
         const input = document.getElementById("answerInput");
         input.readOnly = true;
         const answer = input.value.trim().toLowerCase();
@@ -539,8 +551,7 @@ function checkAnswer(){
         playSound("wrongSound");
     }
     
-    // Cập nhật ngay lập tức điểm lên góc phải
-    document.getElementById("scoreTracker").innerHTML = score + "/" + questions.length;
+    document.getElementById("scoreTracker").innerHTML = score + "/" + playList.length;
     document.getElementById("actionBtn").innerText = "NEXT";
 }
 
@@ -558,12 +569,12 @@ function playSound(audioId) {
 function nextQuestion(){
     if (!isPlaying) return;
     currentQuestion++;
-    if(currentQuestion >= questions.length){ finishQuiz(); return; }
+    if(currentQuestion >= playList.length){ finishQuiz(); return; }
     loadQuestion();
 }
 
 async function sendResultToDatabase() {
-    let record = { name: studentName, correct: score, total: questions.length, time: new Date().toLocaleString('vi-VN') };
+    let record = { name: studentName, correct: score, total: playList.length, time: new Date().toLocaleString('vi-VN') };
     try { await fetch(`${FIREBASE_URL}/analytics.json`, { method: 'POST', body: JSON.stringify(record) }); } catch (e) {}
 }
 
@@ -572,18 +583,17 @@ function finishQuiz(){
     isPlaying = false; clearInterval(timer);
     sendResultToDatabase(); 
     showScreen('resultScreen');
-    document.getElementById("finalScore").innerHTML=score+" / "+questions.length;
+    document.getElementById("finalScore").innerHTML = score + " / " + playList.length;
     playSound("winnerSound");
     launchFireworks();
 }
 
 document.addEventListener("visibilitychange", function() {
     if (document.visibilityState === "hidden" && isPlaying) {
-        totalWrong += (questions.length - currentQuestion); finishQuiz();
+        totalWrong += (playList.length - currentQuestion); finishQuiz();
     }
 });
 
-// BỔ SUNG: Hiển thị list từ vựng có phân biệt dạng câu hỏi
 function renderVocabList() {
     let html = "";
     let container = document.getElementById("vocabListContainer");
@@ -615,7 +625,6 @@ function renderVocabList() {
     container.innerHTML = html;
 }
 
-// BỔ SUNG: Chuyển đổi form nhập cho Giáo viên
 function toggleTeacherForm() {
     let type = document.getElementById("questionTypeSelect").value;
     if(type === 'mc') {
@@ -627,7 +636,6 @@ function toggleTeacherForm() {
     }
 }
 
-// BỔ SUNG: Đẩy câu hỏi theo format mới lên Firebase
 async function addQuestion() {
     let qType = document.getElementById("questionTypeSelect").value;
     let v = document.getElementById("newViet").value.trim();
@@ -670,7 +678,6 @@ async function addQuestion() {
             body: JSON.stringify(dataPayload) 
         });
         
-        // Reset form
         document.getElementById("newViet").value = ""; 
         document.getElementById("newImg").value = "";
         document.getElementById("newEng").value = "";
@@ -813,8 +820,7 @@ loadQuestionsFromDatabase();
 
 document.addEventListener("keypress",function(e){
     if(e.key==="Enter" && !document.getElementById("quizScreen").classList.contains("hidden")){ 
-        // BỔ SUNG: Không cho phép Enter qua câu nếu là dạng trắc nghiệm mà chưa chọn đáp án
-        let currentData = questions[currentQuestion];
+        let currentData = playList[currentQuestion];
         if (currentData && currentData.type === 'mc' && !isChecked && selectedMcIndex === -1) {
             alert("Vui lòng chọn một đáp án trước khi nhấn OK!");
             return;
