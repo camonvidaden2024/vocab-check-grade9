@@ -14,10 +14,11 @@
   font-display: swap;
 }
 
-/* 2. Áp dụng font cho toàn bộ trang web */
+/* 2. Áp dụng font & KHOẢNG CÁCH CHỮ cho toàn bộ trang web */
 * {
   box-sizing: border-box;
   font-family: 'iCiel Pony', sans-serif !important;
+  letter-spacing: 1.5px; /* 👈 GIÃN KHOẢNG CÁCH CHỮ CÁI (Có thể tăng lên 2px hoặc 2.5px nếu muốn thưa hơn) */
 }
 
 /* 3. Tùy chỉnh chi tiết các phần tử trong khung giao diện */
@@ -34,7 +35,7 @@
   color: #b81c1c;
   font-size: 32px;
   font-weight: bold;
-  letter-spacing: 1px;
+  letter-spacing: 2px; /* Dành riêng cho tiêu đề chính */
   margin-bottom: 12px;
 }
 
@@ -42,6 +43,7 @@
   font-family: 'iCiel Pony', sans-serif;
   color: #333333;
   font-size: 18px;
+  letter-spacing: 1.2px;
   margin-bottom: 24px;
 }
 
@@ -55,6 +57,7 @@
   font-size: 16px;
   cursor: pointer;
   text-transform: uppercase;
+  letter-spacing: 1.5px;
 }
 
 .btn-pupil {
@@ -93,6 +96,7 @@ h1 {
     font-size: clamp(28px, 6vw, 48px);
     color: white;
     text-shadow: 3px 3px 5px rgba(0,0,0,.25);
+    letter-spacing: 2.5px; /* Giãn chữ rộng hơn cho tiêu đề H1 */
     margin-top: 0;
     margin-bottom: 15px;
     word-break: break-word;
@@ -106,6 +110,7 @@ input, select {
     border-radius: 10px;
     border: 2px solid #ccc;
     font-family: 'iCiel Pony', sans-serif;
+    letter-spacing: 1.5px;
     margin-bottom: 15px;
     display: inline-block;
 }
@@ -120,6 +125,7 @@ button {
     background: #F99895;
     color: white;
     font-family: 'iCiel Pony', sans-serif;
+    letter-spacing: 1.5px;
     transition: 0.2s;
     max-width: 100%;
 }
@@ -141,8 +147,8 @@ button:hover { background: #e08582; }
     gap: 10px;
 }
 
-#timer { font-size: 22px; color: #BA1B18; font-weight: bold; margin: 0; }
-#scoreTracker { font-size: 22px; color: #4A90E2; font-weight: bold; }
+#timer { font-size: 22px; color: #BA1B18; font-weight: bold; margin: 0; letter-spacing: 1.5px; }
+#scoreTracker { font-size: 22px; color: #4A90E2; font-weight: bold; letter-spacing: 1.5px; }
 #livesTracker { 
     display: flex; 
     align-items: center; 
