@@ -5,20 +5,64 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VOCAB TIME! - CHILL GAME EDITION</title>
 <style>
-/* 1. KHAI BÁO CẤU HÌNH RESET & FONT */
-* {
-    box-sizing: border-box;
-}
-
+/* 1. Khai báo font iCiel Pony */
 @font-face {
-    font-family: 'Pony';
-    src: url('pony.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
+  font-family: 'iCiel Pony';
+  src: url('./iCiel-Pony.ttf') format('truetype'); /* Đảm bảo file tên là iCiel-Pony.ttf cùng thư mục */
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
+/* 2. Áp dụng font cho toàn bộ trang web */
+* {
+  box-sizing: border-box;
+  font-family: 'iCiel Pony', sans-serif !important;
+}
+
+/* 3. Tùy chỉnh chi tiết các phần tử trong khung giao diện */
+.card-container {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.title {
+  font-family: 'iCiel Pony', sans-serif;
+  color: #b81c1c;
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  font-family: 'iCiel Pony', sans-serif;
+  color: #333333;
+  font-size: 18px;
+  margin-bottom: 24px;
+}
+
+.btn {
+  font-family: 'iCiel Pony', sans-serif;
+  width: 100%;
+  padding: 12px 0;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.btn-pupil {
+  background-color: #ff9aa2;
+}
+
+/* 4. CẤU HÌNH GIAO DIỆN CỦA TRANG */
 body {
-    font-family: 'Pony', sans-serif;
     background: url('cute.gif') no-repeat center center fixed;
     background-size: cover;
     min-height: 100vh;
@@ -61,7 +105,7 @@ input, select {
     font-size: 20px;
     border-radius: 10px;
     border: 2px solid #ccc;
-    font-family: 'Pony', sans-serif;
+    font-family: 'iCiel Pony', sans-serif;
     margin-bottom: 15px;
     display: inline-block;
 }
@@ -75,13 +119,13 @@ button {
     cursor: pointer;
     background: #F99895;
     color: white;
-    font-family: 'Pony', sans-serif;
+    font-family: 'iCiel Pony', sans-serif;
     transition: 0.2s;
     max-width: 100%;
 }
 
 button:hover { background: #e08582; }
-.btn-teacher { background: #4A90E2; }
+.btn-teacher { background: #4a90e2; }
 .btn-teacher:hover { background: #357ABD; }
 .btn-danger { background: #BA1B18; }
 .btn-danger:hover { background: #961311; }
@@ -110,7 +154,7 @@ button:hover { background: #e08582; }
     height: 28px;
     transition: fill 0.3s ease, transform 0.2s ease;
 }
-
+    
 /* FLAPPY BIRD GAME AREA CSS */
 #gameArea {
     width: 100%;
