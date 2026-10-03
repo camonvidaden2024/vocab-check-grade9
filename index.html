@@ -5,8 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VOCAB TIME! - FLAPPY BIRD EDITION</title>
 <style>
+/* 1. KHAI BÁO FONT PONY NGAY ĐẦU THẺ <style> */
+@font-face {
+    font-family: 'Pony';
+    src: url('pony.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* 2. CÁC THAY ĐỔI FONT-FAMILY DƯỚI ĐÂY */
 body{
-    font-family:"Times New Roman",serif;
+    font-family: 'Pony', sans-serif; /* Đã thay Times New Roman */
     background: url('cute.gif') no-repeat center center fixed;
     background-size: cover;
     min-height:100vh;
@@ -38,7 +47,7 @@ input, select{
     font-size:22px;
     border-radius:10px;
     border:2px solid #ccc;
-    font-family:"Times New Roman",serif;
+    font-family: 'Pony', sans-serif; /* Đã thay Times New Roman */
     margin-bottom: 15px;
 }
 button{
@@ -50,9 +59,11 @@ button{
     cursor:pointer;
     background:#F99895;
     color:white;
-    font-family:"Times New Roman",serif;
+    font-family: 'Pony', sans-serif; /* Đã thay Times New Roman */
     transition: 0.2s;
 }
+</style>
+</head>
 button:hover { background: #e08582; }
 .btn-teacher { background: #4A90E2; }
 .btn-teacher:hover { background: #357ABD; }
