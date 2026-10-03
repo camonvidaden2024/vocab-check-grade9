@@ -56,6 +56,11 @@ button{
 button:hover { background: #e08582; }
 .btn-teacher { background: #4A90E2; }
 .btn-teacher:hover { background: #357ABD; }
+.btn-danger { background: #BA1B18; }
+.btn-danger:hover { background: #961311; }
+.btn-success { background: #27ae60; }
+.btn-success:hover { background: #1e824c; }
+
 .quiz-header {
     display: flex;
     justify-content: space-between;
@@ -64,7 +69,17 @@ button:hover { background: #e08582; }
 }
 #timer{ font-size:26px; color:#BA1B18; font-weight:bold; margin: 0; }
 #scoreTracker { font-size:26px; color:#4A90E2; font-weight:bold; }
-#livesTracker { font-size:26px; letter-spacing: 3px; }
+#livesTracker { 
+    display: flex; 
+    align-items: center; 
+    gap: 6px; 
+}
+.heart-icon {
+    width: 28px;
+    height: 28px;
+    transition: fill 0.3s ease, transform 0.2s ease;
+}
+
 /* FLAPPY BIRD GAME AREA CSS */
 #gameArea {
     width: 100%;
@@ -154,6 +169,29 @@ tr:nth-child(even){background-color: #f9f9f9;}
 .mc-input-group { display: flex; align-items: center; margin-bottom: 5px; }
 .mc-input-group input[type="text"] { width: 85%; margin-bottom: 0; }
 .mc-input-group input[type="radio"] { width: 10%; margin-left: 5%; transform: scale(1.5); }
+
+/* WARNING SCREEN STYLING */
+.warning-box {
+    background: #FFF0F0;
+    border: 3px solid #BA1B18;
+    border-radius: 15px;
+    padding: 30px;
+    margin: 20px 0;
+}
+.warning-text {
+    color: #BA1B18;
+    font-size: 26px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+.status-card {
+    background: #f8f9fa;
+    border-left: 5px solid #4A90E2;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: left;
+    margin-bottom: 20px;
+}
 </style>
 </head>
 <body>
@@ -164,6 +202,16 @@ tr:nth-child(even){background-color: #f9f9f9;}
     <br><br>
     <button class="btn-teacher" onclick="checkTeacherPassword()" style="width:85%;">TEACHER</button>
 </div>
+
+<!-- WARNING LOCK SCREEN FOR PUPIL -->
+<div id="warningScreen" class="screen hidden">
+    <div class="warning-box">
+        <h2 class="warning-text">WARNING! THIS LINK IS NOT CONNECTED :&lt;</h2>
+        <p style="font-size: 20px; color: #555; margin-top: 15px;" id="warningReason">Cổng truy cập dành cho học sinh hiện tại đang khóa hoặc đã hết thời gian làm bài.</p>
+    </div>
+    <button style="background:#666; color:white;" onclick="showScreen('roleScreen')">BACK</button>
+</div>
+
 <div id="startScreen" class="screen hidden">
     <h1 style="color:#F99895; text-shadow:none;">VOCAB CHECK</h1>
     <p id="studentNotice" style="font-size:18px; color:#555;">Đang đồng bộ số lượng từ vựng trực tuyến...</p>
@@ -173,9 +221,10 @@ tr:nth-child(even){background-color: #f9f9f9;}
     <br>
     <button style="background:#ccc; color:black; font-size:16px; padding:5px 15px;" onclick="showScreen('roleScreen')">BACK</button>
 </div>
+
 <div id="quizScreen" class="screen hidden">
     <div class="quiz-header">
-        <div id="livesTracker">❤️❤️❤️❤️❤️</div>
+        <div id="livesTracker"></div>
         <div id="scoreTracker">0/0</div>
         <div id="timer">Time Left: 30s</div>
     </div>
@@ -210,20 +259,47 @@ tr:nth-child(even){background-color: #f9f9f9;}
     <br>
     <button id="actionBtn" onclick="handleActionButton()">OK</button>
 </div>
+
 <div id="resultScreen" class="screen hidden" style="position: relative; overflow: hidden;">
     <canvas id="fireworksCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1;"></canvas>
     <div style="position:relative; z-index:2;">
-        <h2 style="font-size:48px;">CONGRATULATIONS!</h2>
+        <h2 style="font-size:48px;" id="resultTitle">CONGRATULATIONS!</h2>
         <p style="font-size:30px;">YOU GET</p>
         <div id="finalScore"></div>
         <br>
         <button onclick="location.reload()" style="background:#4A90E2;">Làm lại bài</button>
     </div>
 </div>
+
 <div id="teacherScreen" class="screen hidden">
     <h1 style="color:#4A90E2; text-shadow:none; font-size:40px;">TEACHER DASHBOARD</h1>
     <button onclick="showScreen('roleScreen')" style="background:#666; font-size:16px; padding:5px 15px; margin-top:0;">Thoát phòng GV</button>
     <hr style="margin:20px 0; border:0; border-top:1px solid #ccc;">
+
+    <!-- TIỆN ÍCH CẤU HÌNH TRUY CẬP PUPIL -->
+    <div style="background:#f0f7ff; border: 2px solid #4A90E2; padding:20px; border-radius:12px; text-align:left; margin-bottom: 25px;">
+        <h2 style="margin-top:0; color:#2c3e50;">⚙️ Quản Lý Quyền & Thời Gian Truy Cập Của Học Sinh</h2>
+        <div class="status-card">
+            <div><b>Trạng thái hiện tại:</b> <span id="teacherAccessStatus" style="font-weight:bold; color:#27ae60;">Đang kiểm tra...</span></div>
+            <div style="margin-top:5px;"><b>Hạn chót làm bài:</b> <span id="teacherDeadlineStatus">Không có giới hạn</span></div>
+        </div>
+        
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+            <button onclick="setPupilAccess(true)" class="btn-success" style="font-size:16px; padding:8px 16px; margin:0;">Mở Truy Cập PUPIL</button>
+            <button onclick="setPupilAccess(false)" class="btn-danger" style="font-size:16px; padding:8px 16px; margin:0;">Khóa Truy Cập PUPIL</button>
+        </div>
+
+        <div style="background:white; padding:15px; border-radius:8px; border:1px solid #ddd;">
+            <p style="margin-top:0; font-weight:bold;">Đặt thời hạn khóa bài tự động:</p>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <input type="datetime-local" id="deadlineInput" style="width: auto; margin-bottom:0; font-size:16px; padding:8px;">
+                <button onclick="saveDeadlineFromInput()" class="btn-teacher" style="font-size:16px; padding:8px 16px; margin:0;">Lưu Hạn Chót</button>
+                <button onclick="setPresetTimer(15)" style="background:#e67e22; font-size:16px; padding:8px 16px; margin:0;">+15 phút</button>
+                <button onclick="setPresetTimer(30)" style="background:#e67e22; font-size:16px; padding:8px 16px; margin:0;">+30 phút</button>
+                <button onclick="clearDeadline()" style="background:#7f8c8d; font-size:16px; padding:8px 16px; margin:0;">Xóa Hạn Chót</button>
+            </div>
+        </div>
+    </div>
     
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
         <h2 style="margin: 10px 0;">1. Ngân Hàng Câu Hỏi (<span id="totalQuestCount">0</span> câu)</h2>
@@ -304,6 +380,16 @@ let isChecked = false;
 let selectedMcIndex = -1;
 let lives = 5;
 
+// Mã màu hex chính xác cho trái tim
+const RED_HEART_COLOR = "#FE5C5C";
+const BLACK_HEART_COLOR = "#000000";
+
+function getHeartSvg(color) {
+    return `<svg class="heart-icon" viewBox="0 0 24 24" fill="${color}" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+    </svg>`;
+}
+
 function playBgMusic() {
     let bgMusic = document.getElementById("bgMusic");
     if (bgMusic && bgMusic.paused) {
@@ -316,6 +402,7 @@ function getAcceptedAnswers(englishString) {
     if(!englishString) return [];
     return englishString.split(',').map(ans => ans.trim().toLowerCase()).filter(ans => ans !== "");
 }
+
 async function loadQuestionsFromDatabase() {
     try {
         let res = await fetch(`${FIREBASE_URL}/questions.json`);
@@ -330,22 +417,132 @@ async function loadQuestionsFromDatabase() {
     if(countEl) countEl.innerText = questions.length;
     renderVocabList();
 }
+
+/* KIỂM TRA QUYỀN TRUY CẬP CỦA PUPIL TRÊN FIREBASE */
+async function checkPupilAccessPermission() {
+    try {
+        let res = await fetch(`${FIREBASE_URL}/config.json`);
+        if(res.ok) {
+            let config = await res.json();
+            if(config) {
+                if(config.accessEnabled === false) {
+                    return { allowed: false, reason: "Giáo viên đã tạm khóa quyền truy cập của học sinh." };
+                }
+                if(config.accessDeadline) {
+                    let deadlineTime = new Date(config.accessDeadline).getTime();
+                    let now = new Date().getTime();
+                    if(now > deadlineTime) {
+                        return { allowed: false, reason: "Đã quá thời gian làm bài do Giáo viên quy định." };
+                    }
+                }
+            }
+        }
+    } catch(e) { console.log("Lỗi kiểm tra config:", e); }
+    return { allowed: true };
+}
+
 async function goToStudentLogin() {
-    playBgMusic(); // Bắt đầu phát nhạc ngay khi bấm Pupil
+    playBgMusic();
+    
+    let check = await checkPupilAccessPermission();
+    if(!check.allowed) {
+        document.getElementById("warningReason").innerText = check.reason;
+        showScreen('warningScreen');
+        return;
+    }
+
     showScreen('startScreen');
     document.getElementById("studentNotice").innerHTML = "Đang đồng bộ số lượng từ vựng trực tuyến...";
     await loadQuestionsFromDatabase();
     document.getElementById("studentNotice").innerHTML = `Hệ thống sẵn sàng! Đang có bài kiểm tra gồm: <b style="color:#BA1B18; font-size:20px;">${questions.length} câu</b>.`;
 }
+
 function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById(screenId).classList.remove('hidden');
-    if(screenId === 'teacherScreen') { loadAnalytics(); toggleTeacherForm(); }
+    if(screenId === 'teacherScreen') { 
+        loadAnalytics(); 
+        toggleTeacherForm();
+        loadTeacherAccessConfig(); 
+    }
 }
+
 function checkTeacherPassword() {
     let pass = prompt("Nhập mật khẩu Giáo Viên để quản lý:");
     if(pass === "442266") { showScreen('teacherScreen'); } else { alert("Sai mật khẩu!"); }
 }
+
+/* TÙY CHỈNH DÀNH CHO TEACHER */
+async function loadTeacherAccessConfig() {
+    let statusEl = document.getElementById("teacherAccessStatus");
+    let deadlineEl = document.getElementById("teacherDeadlineStatus");
+    statusEl.innerText = "Đang tải...";
+    try {
+        let res = await fetch(`${FIREBASE_URL}/config.json`);
+        let config = await res.json();
+        if(!config) config = { accessEnabled: true, accessDeadline: null };
+        
+        if(config.accessEnabled !== false) {
+            statusEl.innerText = "ĐANG MỞ";
+            statusEl.style.color = "#27ae60";
+        } else {
+            statusEl.innerText = "ĐANG KHÓA";
+            statusEl.style.color = "#BA1B18";
+        }
+
+        if(config.accessDeadline) {
+            let d = new Date(config.accessDeadline);
+            deadlineEl.innerText = d.toLocaleString('vi-VN');
+            document.getElementById("deadlineInput").value = config.accessDeadline.slice(0, 16);
+        } else {
+            deadlineEl.innerText = "Không có giới hạn";
+            document.getElementById("deadlineInput").value = "";
+        }
+    } catch(e) {
+        statusEl.innerText = "Không thể kết nối Server";
+        statusEl.style.color = "#BA1B18";
+    }
+}
+
+async function updateFirebaseConfig(newConfigData) {
+    try {
+        let res = await fetch(`${FIREBASE_URL}/config.json`);
+        let currentConfig = await res.json() || {};
+        let updated = { ...currentConfig, ...newConfigData };
+        await fetch(`${FIREBASE_URL}/config.json`, {
+            method: 'PUT',
+            body: JSON.stringify(updated)
+        });
+        await loadTeacherAccessConfig();
+        alert("Đã cập nhật cấu hình truy cập thành công!");
+    } catch(e) { alert("Lỗi khi cập nhật cấu hình!"); }
+}
+
+function setPupilAccess(enabled) { updateFirebaseConfig({ accessEnabled: enabled }); }
+
+function saveDeadlineFromInput() {
+    let val = document.getElementById("deadlineInput").value;
+    if(!val) { alert("Vui lòng chọn ngày và giờ hạn chót!"); return; }
+    let isoDate = new Date(val).toISOString();
+    updateFirebaseConfig({ accessDeadline: isoDate, accessEnabled: true });
+}
+
+function setPresetTimer(minutes) {
+    let now = new Date();
+    now.setMinutes(now.getMinutes() + minutes);
+    let year = now.getFullYear();
+    let month = String(now.getMonth() + 1).padStart(2, '0');
+    let day = String(now.getDate()).padStart(2, '0');
+    let hours = String(now.getHours()).padStart(2, '0');
+    let mins = String(now.getMinutes()).padStart(2, '0');
+    let localIso = `${year}-${month}-${day}T${hours}:${mins}`;
+    
+    document.getElementById("deadlineInput").value = localIso;
+    saveDeadlineFromInput();
+}
+
+function clearDeadline() { updateFirebaseConfig({ accessDeadline: null }); }
+
 function shuffleArray(array){
     for(let i = array.length - 1; i > 0; i--){
         let j = Math.floor(Math.random() * (i + 1));
@@ -355,26 +552,32 @@ function shuffleArray(array){
     }
     return array;
 }
+
 function unlockAudio() {
     ['correctSound', 'wrongSound', 'winnerSound'].forEach(id => {
         let audio = document.getElementById(id);
         if (audio) { audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(() => {}); }
     });
 }
+
 function updateLivesUI() {
     let html = "";
-    for(let i=0; i<5; i++) {
-        if(i < lives) html += "❤";
-        else html += "🖤";
+    for(let i = 0; i < 5; i++) {
+        if(i < lives) {
+            html += getHeartSvg(RED_HEART_COLOR);
+        } else {
+            html += getHeartSvg(BLACK_HEART_COLOR);
+        }
     }
     document.getElementById("livesTracker").innerHTML = html;
 }
+
 function startGame(){
     studentName = document.getElementById("studentName").value.trim();
     if(studentName===""){alert("Please type your name!");return;}
     if(questions.length === 0) { alert("Không có câu hỏi nào để bắt đầu!"); return; }
     
-    playBgMusic(); // Giữ nhạc nền chạy liên tục
+    playBgMusic();
     unlockAudio();
     currentQuestion = 0; score = 0; totalWrong = 0;
     lives = 5;
@@ -387,6 +590,7 @@ function startGame(){
     isPlaying = true; 
     loadQuestion();
 }
+
 function startTimer() {
     clearInterval(timer);
     timeLeft = 30;
@@ -400,6 +604,7 @@ function startTimer() {
         }
     }, 1000);
 }
+
 function loadQuestion(){
     if (currentQuestion >= playList.length) { finishQuiz(); return; }
     isChecked = false;
@@ -468,15 +673,18 @@ function loadQuestion(){
     document.getElementById("actionBtn").innerText = "OK";
     startTimer();
 }
+
 function selectMcOption(index) {
     if(isChecked) return; 
     selectedMcIndex = index;
     document.querySelectorAll('.mc-btn').forEach(btn => btn.classList.remove("selected"));
     document.getElementById(`mcBtn${index}`).classList.add("selected");
 }
+
 function handleActionButton() {
     if (!isChecked) { checkAnswer(); } else { nextQuestion(); }
 }
+
 function checkAnswer(){
     clearInterval(timer);
     isChecked = true;
@@ -530,6 +738,7 @@ function checkAnswer(){
     document.getElementById("scoreTracker").innerHTML = score + "/" + playList.length;
     document.getElementById("actionBtn").innerText = "NEXT";
 }
+
 function playSound(audioId) {
     try {
         let snd = document.getElementById(audioId);
@@ -540,37 +749,52 @@ function playSound(audioId) {
         }
     } catch(e){}
 }
+
 function nextQuestion(){
     if (!isPlaying) return;
     let pipe = document.getElementById("pipe");
     pipe.style.transition = "left 0.6s ease-in";
     pipe.style.left = "-20%"; 
     setTimeout(() => {
-        if (lives <= 0) { finishQuiz(); return; }
+        if (lives <= 0) { finishQuiz(true); return; }
         
         currentQuestion++;
-        if(currentQuestion >= playList.length){ finishQuiz(); return; }
+        if(currentQuestion >= playList.length){ finishQuiz(false); return; }
         loadQuestion();
     }, 600);
 }
+
 async function sendResultToDatabase() {
     let record = { name: studentName, correct: score, total: playList.length, time: new Date().toLocaleString('vi-VN') };
     try { await fetch(`${FIREBASE_URL}/analytics.json`, { method: 'POST', body: JSON.stringify(record) }); } catch (e) {}
 }
-function finishQuiz(){
+
+function finishQuiz(isGameOver = false){
     if(!isPlaying) return;
     isPlaying = false; clearInterval(timer);
     sendResultToDatabase(); 
     showScreen('resultScreen');
+    
+    let resultTitle = document.getElementById("resultTitle");
+    if(isGameOver) {
+        resultTitle.innerText = "GAME OVER!";
+        resultTitle.style.color = "#BA1B18";
+    } else {
+        resultTitle.innerText = "CONGRATULATIONS!";
+        resultTitle.style.color = "#27ae60";
+        launchFireworks();
+    }
+    
     document.getElementById("finalScore").innerHTML = score + " / " + playList.length;
     playSound("winnerSound");
-    launchFireworks();
 }
+
 document.addEventListener("visibilitychange", function() {
     if (document.visibilityState === "hidden" && isPlaying) {
-        totalWrong += (playList.length - currentQuestion); finishQuiz();
+        totalWrong += (playList.length - currentQuestion); finishQuiz(true);
     }
 });
+
 function renderVocabList() {
     let html = "";
     let container = document.getElementById("vocabListContainer");
@@ -601,6 +825,7 @@ function renderVocabList() {
     });
     container.innerHTML = html;
 }
+
 function toggleTeacherForm() {
     let type = document.getElementById("questionTypeSelect").value;
     if(type === 'mc') {
@@ -611,6 +836,7 @@ function toggleTeacherForm() {
         document.getElementById("mcFormGroup").classList.add("hidden");
     }
 }
+
 async function addQuestion() {
     let qType = document.getElementById("questionTypeSelect").value;
     let v = document.getElementById("newViet").value.trim();
@@ -645,11 +871,13 @@ async function addQuestion() {
     } catch(err){}
     await loadQuestionsFromDatabase();
 }
+
 async function deleteQuestion(id) {
     if(!confirm("Xóa câu hỏi này khỏi hệ thống?")) return;
     try { await fetch(`${FIREBASE_URL}/questions/${id}.json`, { method: 'DELETE' }); } catch(e){}
     await loadQuestionsFromDatabase();
 }
+
 async function deleteAllQuestions() {
     if(confirm("⚠️ CẢNH BÁO: XÓA TOÀN BỘ từ vựng hiện tại?") && confirm("Hành động không thể hoàn tác!")) {
         try {
@@ -659,6 +887,7 @@ async function deleteAllQuestions() {
         } catch(err) { alert("Lỗi khi kết nối database."); }
     }
 }
+
 async function loadAnalytics() {
     let tbody = document.getElementById("analyticsTableBody");
     if(!tbody) return;
@@ -692,11 +921,13 @@ async function loadAnalytics() {
         tbody.innerHTML = html;
     } catch(err) { tbody.innerHTML = "<tr><td colspan='4' style='color:red;'>Lỗi đồng bộ.</td></tr>"; }
 }
+
 async function clearAnalytics() {
     if(!confirm("Bạn có chắc chắn muốn xóa sạch lịch sử làm bài?")) return;
     try { await fetch(`${FIREBASE_URL}/analytics.json`, { method: 'DELETE' }); } catch(e){}
     loadAnalytics();
 }
+
 function launchFireworks() {
     createBalloons(15);
     const canvas = document.getElementById('fireworksCanvas');
@@ -743,6 +974,7 @@ function launchFireworks() {
     }
     animate();
 }
+
 function createBalloons(count) {
     const container = document.getElementById('resultScreen');
     const balloonColors = ['#FF5964', '#35A7FF', '#FFE74C', '#6BF178', '#9B51E0'];
@@ -759,6 +991,7 @@ function createBalloons(count) {
         setTimeout(() => balloon.remove(), 7000);
     }
 }
+
 document.getElementById("totalQuestCount").innerText = questions.length;
 renderVocabList();
 loadQuestionsFromDatabase();
