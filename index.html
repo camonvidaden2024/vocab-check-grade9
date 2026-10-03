@@ -3,9 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VOCAB TIME! - FLAPPY BIRD EDITION</title>
+<title>VOCAB TIME! - CHILL GAME EDITION</title>
 <style>
-/* 1. KHAI BÁO FONT PONY NGAY ĐẦU THẺ <style> */
+/* 1. KHAI BÁO CẤU HÌNH RESET & FONT */
+* {
+    box-sizing: border-box;
+}
+
 @font-face {
     font-family: 'Pony';
     src: url('pony.ttf') format('truetype');
@@ -13,57 +17,69 @@
     font-style: normal;
 }
 
-/* 2. CÁC THAY ĐỔI FONT-FAMILY DƯỚI ĐÂY */
-body{
-    font-family: 'Pony', sans-serif; /* Đã thay Times New Roman */
+body {
+    font-family: 'Pony', sans-serif;
     background: url('cute.gif') no-repeat center center fixed;
     background-size: cover;
-    min-height:100vh;
-    margin:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1.3;
 }
-.screen{
-    width:85%;
-    max-width:750px;
-    background:rgba(255,255,255,0.95);
-    padding:35px;
-    border-radius:20px;
-    box-shadow:0 10px 25px rgba(0,0,0,.15);
-    text-align:center;
-    margin: 20px;
+
+.screen {
+    width: 100%;
+    max-width: 750px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.15);
+    text-align: center;
+    margin: 10px auto;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
-.hidden{display:none !important;} 
-h1{
-    font-size:52px;
-    color:white;
-    text-shadow:3px 3px 5px rgba(0,0,0,.25);
+
+.hidden { display: none !important; }
+
+h1 {
+    font-size: clamp(28px, 6vw, 48px);
+    color: white;
+    text-shadow: 3px 3px 5px rgba(0,0,0,.25);
     margin-top: 0;
-}
-input, select{
-    width:80%;
-    padding:14px;
-    font-size:22px;
-    border-radius:10px;
-    border:2px solid #ccc;
-    font-family: 'Pony', sans-serif; /* Đã thay Times New Roman */
     margin-bottom: 15px;
+    word-break: break-word;
 }
-button{
-    margin-top:20px;
-    padding:12px 30px;
-    font-size:22px;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
-    background:#F99895;
-    color:white;
-    font-family: 'Pony', sans-serif; /* Đã thay Times New Roman */
+
+input, select {
+    width: 100%;
+    max-width: 500px;
+    padding: 12px 14px;
+    font-size: 20px;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    font-family: 'Pony', sans-serif;
+    margin-bottom: 15px;
+    display: inline-block;
+}
+
+button {
+    margin-top: 10px;
+    padding: 12px 25px;
+    font-size: 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #F99895;
+    color: white;
+    font-family: 'Pony', sans-serif;
     transition: 0.2s;
+    max-width: 100%;
 }
-</style>
-</head>
+
 button:hover { background: #e08582; }
 .btn-teacher { background: #4A90E2; }
 .btn-teacher:hover { background: #357ABD; }
@@ -77,14 +93,18 @@ button:hover { background: #e08582; }
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
-#timer{ font-size:26px; color:#BA1B18; font-weight:bold; margin: 0; }
-#scoreTracker { font-size:26px; color:#4A90E2; font-weight:bold; }
+
+#timer { font-size: 22px; color: #BA1B18; font-weight: bold; margin: 0; }
+#scoreTracker { font-size: 22px; color: #4A90E2; font-weight: bold; }
 #livesTracker { 
     display: flex; 
     align-items: center; 
     gap: 6px; 
 }
+
 .heart-icon {
     width: 28px;
     height: 28px;
@@ -107,10 +127,12 @@ button:hover { background: #e08582; }
     margin-bottom: 15px;
     box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
 }
+
 @keyframes moveClouds {
     from { background-position-x: 0; }
     to { background-position-x: 150px; }
 }
+
 .bird {
     position: absolute;
     left: 20%;
@@ -124,15 +146,18 @@ button:hover { background: #e08582; }
     z-index: 10;
     animation: flap 0.5s infinite alternate ease-in-out;
 }
+
 @keyframes flap {
     0% { transform: translateY(-4px); }
     100% { transform: translateY(4px); }
 }
+
 .blink-red { animation: hurtBlink 0.5s; }
 @keyframes hurtBlink {
     0%, 100% { filter: brightness(1); }
     50% { filter: brightness(0.4) sepia(1) hue-rotate(-50deg) saturate(5); }
 }
+
 .pipe {
     position: absolute;
     left: 100%;
@@ -140,60 +165,76 @@ button:hover { background: #e08582; }
     width: 60px;
     height: 100%;
 }
+
 .pipe-top {
     position: absolute;
     top: -4px; left: 0; width: 100%; height: 50px;
     background: #73bf2e; border: 4px solid #543847; border-bottom-width: 8px;
 }
+
 .pipe-bottom {
     position: absolute;
     bottom: -4px; left: 0; width: 100%; height: 50px;
     background: #73bf2e; border: 4px solid #543847; border-top-width: 8px;
 }
-#progressContainer{ width:100%; height:22px; background:#ddd; border-radius:20px; overflow:hidden; margin:15px 0; }
-#progressBar{ width:0%; height:100%; background:#9ABF17; transition:.4s; }
-#questionCounter{font-size:20px; color:#666; margin-bottom: 10px;}
-#questionBox{ font-size:38px; font-weight:bold; margin:20px 0; }
+
+#progressContainer { width: 100%; height: 22px; background: #ddd; border-radius: 20px; overflow: hidden; margin: 15px 0; }
+#progressBar { width: 0%; height: 100%; background: #9ABF17; transition: .4s; }
+#questionCounter { font-size: 18px; color: #666; margin-bottom: 10px; }
+#questionBox { font-size: clamp(24px, 5vw, 34px); font-weight: bold; margin: 15px 0; word-break: break-word; }
+
 .question-image-container { margin: 15px 0; }
 .question-image { max-width: 100%; max-height: 220px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); object-fit: contain; }
-.correct{background:#9ABF17 !important;color:white;}
-.wrong{background:#BA1B18 !important;color:white;}
-#feedback{ font-size:80px; height:90px; font-weight:bold; }
-.correctMark{color:#9ABF17;}
-.wrongMark{color:#BA1B18;}
-#finalScore{ font-size:48px; color:#9ABF17; font-weight:bold; }
+
+.correct { background: #9ABF17 !important; color: white; }
+.wrong { background: #BA1B18 !important; color: white; }
+
+#feedback { font-size: 60px; height: 70px; font-weight: bold; line-height: 1; }
+.correctMark { color: #9ABF17; }
+.wrongMark { color: #BA1B18; }
+#finalScore { font-size: 40px; color: #9ABF17; font-weight: bold; }
+
 table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-th, td { border: 1px solid #ddd; padding: 12px; text-align: left; font-size: 18px; }
+th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 16px; word-break: break-word; }
 th { background-color: #4A90E2; color: white; }
-tr:nth-child(even){background-color: #f9f9f9;}
+tr:nth-child(even) { background-color: #f9f9f9; }
+
 .vocab-list { max-height: 250px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; background: #fff; border-radius: 8px; text-align: left; margin-bottom: 20px; }
-.vocab-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 18px; align-items: center;}
-.vocab-thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; margin-right: 10px; vertical-align: middle; }
-.mc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
-.mc-btn { background: #f0f0f0; color: #333; border: 2px solid #ccc; margin: 0; font-size: 20px; border-radius: 10px; padding: 15px 10px; }
+.vocab-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 16px; align-items: center; gap: 10px; flex-wrap: wrap; }
+.vocab-thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
+
+.mc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 15px 0; }
+@media (max-width: 500px) {
+    .mc-grid { grid-template-columns: 1fr; }
+}
+
+.mc-btn { background: #f0f0f0; color: #333; border: 2px solid #ccc; margin: 0; font-size: 18px; border-radius: 10px; padding: 12px 8px; width: 100%; }
 .mc-btn:hover { background: #e4e4e4; }
 .mc-btn.selected { border-color: #4A90E2; background: #eef5fc; }
+
 .balloon { position: absolute; bottom: -120px; width: 50px; height: 65px; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; z-index: 1; pointer-events: none; animation: floatUp linear infinite; }
 .balloon::after { content: ""; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 8px solid inherit; }
 .balloon-string { position: absolute; bottom: -40px; left: 50%; width: 2px; height: 40px; background: rgba(0,0,0,0.15); transform: translateX(-50%); }
 @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(-110vh) rotate(15deg); opacity: 0; } }
-.mc-input-group { display: flex; align-items: center; margin-bottom: 5px; }
-.mc-input-group input[type="text"] { width: 85%; margin-bottom: 0; }
-.mc-input-group input[type="radio"] { width: 10%; margin-left: 5%; transform: scale(1.5); }
+
+.mc-input-group { display: flex; align-items: center; margin-bottom: 10px; gap: 10px; }
+.mc-input-group input[type="text"] { width: 100%; margin-bottom: 0; }
+.mc-input-group input[type="radio"] { width: 24px; height: 24px; flex-shrink: 0; margin: 0; cursor: pointer; }
 
 /* WARNING SCREEN STYLING */
 .warning-box {
     background: #FFF0F0;
     border: 3px solid #BA1B18;
     border-radius: 15px;
-    padding: 30px;
+    padding: 20px;
     margin: 20px 0;
 }
 .warning-text {
     color: #BA1B18;
-    font-size: 26px;
+    font-size: 22px;
     font-weight: bold;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
+    margin-top: 0;
 }
 .status-card {
     background: #f8f9fa;
@@ -208,7 +249,7 @@ tr:nth-child(even){background-color: #f9f9f9;}
 <body>
 <div id="roleScreen" class="screen">
     <h1 style="color:#BA1B18; text-shadow:none;">VOCABULARY SYSTEM</h1>
-    <p style="font-size:24px; margin-bottom:30px;">Who are you?:</p>
+    <p style="font-size:22px; margin-bottom:25px;">Who are you?:</p>
     <button onclick="goToStudentLogin()" style="width:85%;">PUPIL</button>
     <br><br>
     <button class="btn-teacher" onclick="checkTeacherPassword()" style="width:85%;">TEACHER</button>
@@ -218,7 +259,7 @@ tr:nth-child(even){background-color: #f9f9f9;}
 <div id="warningScreen" class="screen hidden">
     <div class="warning-box">
         <h2 class="warning-text">WARNING! THIS LINK IS NOT CONNECTED :&lt;</h2>
-        <p style="font-size: 20px; color: #555; margin-top: 15px;" id="warningReason">Cổng truy cập dành cho học sinh hiện tại đang khóa hoặc đã hết thời gian làm bài.</p>
+        <p style="font-size: 18px; color: #555; margin-top: 15px;" id="warningReason">Cổng truy cập dành cho học sinh hiện tại đang khóa hoặc đã hết thời gian làm bài.</p>
     </div>
     <button style="background:#666; color:white;" onclick="showScreen('roleScreen')">BACK</button>
 </div>
@@ -230,7 +271,7 @@ tr:nth-child(even){background-color: #f9f9f9;}
     <br>
     <button id="btnStartStudent" onclick="startGame()" style="background:#F99895; color:white;">START</button>
     <br>
-    <button style="background:#ccc; color:black; font-size:16px; padding:5px 15px;" onclick="showScreen('roleScreen')">BACK</button>
+    <button style="background:#ccc; color:black; font-size:16px; padding:6px 18px;" onclick="showScreen('roleScreen')">BACK</button>
 </div>
 
 <div id="quizScreen" class="screen hidden">
@@ -274,8 +315,8 @@ tr:nth-child(even){background-color: #f9f9f9;}
 <div id="resultScreen" class="screen hidden" style="position: relative; overflow: hidden;">
     <canvas id="fireworksCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1;"></canvas>
     <div style="position:relative; z-index:2;">
-        <h2 style="font-size:40px;" id="resultTitle">CONGRATULATIONS!</h2>
-        <p style="font-size:30px;">YOU GET</p>
+        <h2 style="font-size:36px;" id="resultTitle">CONGRATULATIONS!</h2>
+        <p style="font-size:26px;">YOU GET</p>
         <div id="finalScore"></div>
         <br>
         <button onclick="location.reload()" style="background:#4A90E2;">RETURN</button>
@@ -283,13 +324,13 @@ tr:nth-child(even){background-color: #f9f9f9;}
 </div>
 
 <div id="teacherScreen" class="screen hidden">
-    <h1 style="color:#4A90E2; text-shadow:none; font-size:40px;">TEACHER DASHBOARD</h1>
-    <button onclick="showScreen('roleScreen')" style="background:#666; font-size:16px; padding:5px 15px; margin-top:0;">Thoát phòng GV</button>
+    <h1 style="color:#4A90E2; text-shadow:none; font-size:36px;">TEACHER DASHBOARD</h1>
+    <button onclick="showScreen('roleScreen')" style="background:#666; font-size:16px; padding:6px 15px; margin-top:0;">Thoát phòng GV</button>
     <hr style="margin:20px 0; border:0; border-top:1px solid #ccc;">
-
+    
     <!-- TIỆN ÍCH CẤU HÌNH TRUY CẬP PUPIL -->
     <div style="background:#f0f7ff; border: 2px solid #4A90E2; padding:20px; border-radius:12px; text-align:left; margin-bottom: 25px;">
-        <h2 style="margin-top:0; color:#2c3e50;">⚙️ Quản Lý Quyền & Thời Gian Truy Cập Của Học Sinh</h2>
+        <h2 style="margin-top:0; color:#2c3e50; font-size:20px;">⚙️ Quản Lý Quyền & Thời Gian Truy Cập Của Học Sinh</h2>
         <div class="status-card">
             <div><b>Trạng thái hiện tại:</b> <span id="teacherAccessStatus" style="font-weight:bold; color:#27ae60;">Đang kiểm tra...</span></div>
             <div style="margin-top:5px;"><b>Hạn chót làm bài:</b> <span id="teacherDeadlineStatus">Không có giới hạn</span></div>
@@ -299,39 +340,38 @@ tr:nth-child(even){background-color: #f9f9f9;}
             <button onclick="setPupilAccess(true)" class="btn-success" style="font-size:16px; padding:8px 16px; margin:0;">Mở Truy Cập PUPIL</button>
             <button onclick="setPupilAccess(false)" class="btn-danger" style="font-size:16px; padding:8px 16px; margin:0;">Khóa Truy Cập PUPIL</button>
         </div>
-
         <div style="background:white; padding:15px; border-radius:8px; border:1px solid #ddd;">
-            <p style="margin-top:0; font-weight:bold;">Đặt thời hạn khóa bài tự động:</p>
+            <p style="margin-top:0; font-weight:bold; font-size:16px;">Đặt thời hạn khóa bài tự động:</p>
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                <input type="datetime-local" id="deadlineInput" style="width: auto; margin-bottom:0; font-size:16px; padding:8px;">
-                <button onclick="saveDeadlineFromInput()" class="btn-teacher" style="font-size:16px; padding:8px 16px; margin:0;">Lưu Hạn Chót</button>
-                <button onclick="setPresetTimer(15)" style="background:#e67e22; font-size:16px; padding:8px 16px; margin:0;">+15 phút</button>
-                <button onclick="setPresetTimer(30)" style="background:#e67e22; font-size:16px; padding:8px 16px; margin:0;">+30 phút</button>
-                <button onclick="clearDeadline()" style="background:#7f8c8d; font-size:16px; padding:8px 16px; margin:0;">Xóa Hạn Chót</button>
+                <input type="datetime-local" id="deadlineInput" style="width: auto; margin-bottom:0; font-size:15px; padding:8px;">
+                <button onclick="saveDeadlineFromInput()" class="btn-teacher" style="font-size:15px; padding:8px 16px; margin:0;">Lưu Hạn Chót</button>
+                <button onclick="setPresetTimer(15)" style="background:#e67e22; font-size:15px; padding:8px 16px; margin:0;">+15 phút</button>
+                <button onclick="setPresetTimer(30)" style="background:#e67e22; font-size:15px; padding:8px 16px; margin:0;">+30 phút</button>
+                <button onclick="clearDeadline()" style="background:#7f8c8d; font-size:15px; padding:8px 16px; margin:0;">Xóa Hạn Chót</button>
             </div>
         </div>
     </div>
     
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-        <h2 style="margin: 10px 0;">1. Ngân Hàng Câu Hỏi (<span id="totalQuestCount">0</span> câu)</h2>
+        <h2 style="margin: 10px 0; font-size:20px;">1. Ngân Hàng Câu Hỏi (<span id="totalQuestCount">0</span> câu)</h2>
         <button onclick="deleteAllQuestions()" style="background:#BA1B18; font-size:14px; padding:6px 15px; margin: 10px 0;">❌ Xóa tất cả</button>
     </div>
     <div class="vocab-list" id="vocabListContainer"></div>
     
     <div style="background:#eef5fc; padding:20px; border-radius:10px; text-align:left;">
-        <h3 style="margin-top:0;">Thêm từ vựng/câu hỏi mới:</h3>
-        <select id="questionTypeSelect" onchange="toggleTeacherForm()" style="width: 95%; background: white;">
+        <h3 style="margin-top:0; font-size:18px;">Thêm từ vựng/câu hỏi mới:</h3>
+        <select id="questionTypeSelect" onchange="toggleTeacherForm()" style="width: 100%; max-width:100%; background: white;">
             <option value="text">Dạng 1: Học sinh tự gõ đáp án</option>
             <option value="mc">Dạng 2: Trắc nghiệm 4 đáp án (Chỉ chọn 1)</option>
         </select>
-        <input type="text" id="newViet" placeholder="Câu hỏi / Nghĩa tiếng Việt (Ví dụ: lính cứu hỏa)" style="width:95%;">
-        <input type="text" id="newImg" placeholder="Link/URL hình ảnh (Tùy chọn - Ví dụ: https://example.com/...)" style="width:95%;">
+        <input type="text" id="newViet" placeholder="Câu hỏi / Nghĩa tiếng Việt (Ví dụ: lính cứu hỏa)" style="width:100%; max-width:100%;">
+        <input type="text" id="newImg" placeholder="Link/URL hình ảnh (Tùy chọn - Ví dụ: https://example.com/...)" style="width:100%; max-width:100%;">
         
         <div id="textFormGroup">
-            <input type="text" id="newEng" placeholder="Các đáp án tiếng Anh - cách nhau dấu phẩy (Ví dụ: firefighter)" style="width:95%;">
+            <input type="text" id="newEng" placeholder="Các đáp án tiếng Anh - cách nhau dấu phẩy (Ví dụ: firefighter)" style="width:100%; max-width:100%;">
         </div>
-        <div id="mcFormGroup" class="hidden" style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ccc; width: 91%;">
-            <p style="margin-top:0; font-size:18px;">Nhập 4 đáp án và tích chọn vào đáp án ĐÚNG:</p>
+        <div id="mcFormGroup" class="hidden" style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ccc; width: 100%;">
+            <p style="margin-top:0; font-size:16px;">Nhập 4 đáp án và tích chọn vào đáp án ĐÚNG:</p>
             <div class="mc-input-group">
                 <input type="text" id="mcOpt0" placeholder="Đáp án A">
                 <input type="radio" name="mcCorrect" value="0" checked>
@@ -352,8 +392,8 @@ tr:nth-child(even){background-color: #f9f9f9;}
         <button class="btn-teacher" onclick="addQuestion()" style="margin-top:15px;">Thêm Vào Hệ Thống</button>
     </div>
     <hr style="margin:30px 0; border:0; border-top:1px solid #ccc;">
-    <h2>2. Giám Sát Kết Quả Học Sinh Trực Tuyến</h2>
-    <button onclick="clearAnalytics()" style="background:#BA1B18; font-size:16px; padding:5px 15px;">Xóa toàn bộ lịch sử</button>
+    <h2 style="font-size:20px;">2. Giám Sát Kết Quả Học Sinh Trực Tuyến</h2>
+    <button onclick="clearAnalytics()" style="background:#BA1B18; font-size:15px; padding:6px 15px;">Xóa toàn bộ lịch sử</button>
     <div style="overflow-x:auto;">
         <table>
             <thead>
@@ -391,7 +431,6 @@ let isChecked = false;
 let selectedMcIndex = -1;
 let lives = 5;
 
-// Mã màu hex chính xác cho trái tim
 const RED_HEART_COLOR = "#FE5C5C";
 const BLACK_HEART_COLOR = "#000000";
 
@@ -429,7 +468,6 @@ async function loadQuestionsFromDatabase() {
     renderVocabList();
 }
 
-/* KIỂM TRA QUYỀN TRUY CẬP CỦA PUPIL TRÊN FIREBASE */
 async function checkPupilAccessPermission() {
     try {
         let res = await fetch(`${FIREBASE_URL}/config.json`);
@@ -461,7 +499,6 @@ async function goToStudentLogin() {
         showScreen('warningScreen');
         return;
     }
-
     showScreen('startScreen');
     document.getElementById("studentNotice").innerHTML = "Đang đồng bộ số lượng từ vựng trực tuyến...";
     await loadQuestionsFromDatabase();
@@ -483,7 +520,6 @@ function checkTeacherPassword() {
     if(pass === "442266") { showScreen('teacherScreen'); } else { alert("Sai mật khẩu!"); }
 }
 
-/* TÙY CHỈNH DÀNH CHO TEACHER */
 async function loadTeacherAccessConfig() {
     let statusEl = document.getElementById("teacherAccessStatus");
     let deadlineEl = document.getElementById("teacherDeadlineStatus");
@@ -500,7 +536,6 @@ async function loadTeacherAccessConfig() {
             statusEl.innerText = "ĐANG KHÓA";
             statusEl.style.color = "#BA1B18";
         }
-
         if(config.accessDeadline) {
             let d = new Date(config.accessDeadline);
             deadlineEl.innerText = d.toLocaleString('vi-VN');
@@ -827,7 +862,7 @@ function renderVocabList() {
         }
         
         html += `<div class="vocab-item">
-            <span style="display:flex; align-items:center;">
+            <span style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
                 ${imgTag}
                 <span>${index+1}. <b>${q.vietnamese || "Hình ảnh"}</b>: ${displayType}</span>
             </span>
@@ -919,14 +954,14 @@ async function loadAnalytics() {
         
         if (attemptsList.length === 0) { tbody.innerHTML = "<tr><td colspan='4'>Chưa có dữ liệu.</td></tr>"; return; }
         let html = "";
-        attemptsList.forEach((item, index) => {
+        attemptsList.forEach((index_item, index) => {
             html += `<tr>
                 <td>${index + 1}</td>
-                <td><b>${item.name}</b></td>
+                <td><b>${index_item.name}</b></td>
                 <td style="color:#2C3E50; font-weight:bold;">
-                    <span style="color:#9ABF17;">${item.correct}</span> / <span>${item.total}</span> câu
+                    <span style="color:#9ABF17;">${index_item.correct}</span> / <span>${index_item.total}</span> câu
                 </td>
-                <td>${item.time}</td>
+                <td>${index_item.time}</td>
             </tr>`;
         });
         tbody.innerHTML = html;
